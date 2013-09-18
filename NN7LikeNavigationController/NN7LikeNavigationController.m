@@ -135,72 +135,93 @@
 {
     [_viewControllers addObject:viewController];
     
-    [viewController setNN7NavigationController:self];
-    
-    if ([self _isOver5]) {
-        [self addChildViewController:viewController];
-    } else {
-        [viewController viewWillAppear:animated];
+    // Setup next ViewController
+    {
+        [viewController setNN7NavigationController:self];
+        
+        // TODO: setup navigationBar
     }
     
-    viewController.view.frame = _containerView.bounds;
-    viewController.view.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
-    
-    [_containerView addSubview:viewController.view];
-    
-    // shadow
-    _coverShadowView.alpha = 0.;
-    _gradationShadowView.alpha = 0.;
-    _gradationShadowView.frame = CGRectMake(_containerView.frame.size.width - _gradationShadowView.frame.size.width,
-                                            0,
-                                            _gradationShadowView.frame.size.width,
-                                            _gradationShadowView.frame.size.height);
-    
-    [_containerView insertSubview:_coverShadowView belowSubview:viewController.view];
-    [_containerView insertSubview:_gradationShadowView aboveSubview:_coverShadowView];
-    
-    if (animated) {
-        CGRect targetVisibleRect = [[_visibleViewController view] frame];
-        targetVisibleRect.origin.x = -(self.view.frame.size.width / 2.);
-    
-        CGRect targetNextViewRect = viewController.view.frame;
-        targetNextViewRect.origin.x = self.view.frame.size.width;
-        viewController.view.frame = targetNextViewRect;
-        targetNextViewRect.origin.x = 0;
+    // Prepare next viewController
+    {
+        viewController.view.frame = _containerView.bounds;
+        viewController.view.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
         
-        __block typeof (_visibleViewController)weakVisible = _visibleViewController;
+        if ([self _isOver5]) {
+            [self addChildViewController:viewController];
+        } else {
+            [viewController viewWillAppear:animated];
+        }
+    }
+    
+    // Prepare Shadow
+    {
+        _coverShadowView.alpha = 0.;
+        _gradationShadowView.alpha = 0.;
+        _gradationShadowView.frame = CGRectMake(_containerView.frame.size.width - _gradationShadowView.frame.size.width,
+                                                0,
+                                                _gradationShadowView.frame.size.width,
+                                                _gradationShadowView.frame.size.height);
         
-        [UIView animateWithDuration:0.24 delay:0. options:UIViewAnimationOptionCurveEaseInOut animations:^{
-            if (weakVisible) {
-                weakVisible.view.frame = targetVisibleRect;
-            }
-            viewController.view.frame = targetNextViewRect;
-            
-            // shadow
-            _coverShadowView.alpha = MaxShadowAlpha;
-            _gradationShadowView.alpha = 1.;
-            CGRect rect = _gradationShadowView.frame;
-            rect.origin.x = -_gradationShadowView.frame.size.width;
-            _gradationShadowView.frame = rect;
-            
-        } completion:^(BOOL finished) {
-            if (weakVisible) {
-                if ([self _isOver5]) {
-                    [weakVisible removeFromParentViewController];
-                } else {
-                    [viewController viewDidAppear:animated];
-                    [weakVisible viewWillDisappear:animated];
-                }
-                [weakVisible.view removeFromSuperview];
-            }
-            // TODO:iOS4対応のweakどうやってかく？？？
-            _visibleViewController = viewController;
-        }];
-    } else {
-        if ([self _isOver5] == NO) {
+        //TODO: shadow height は barの高さを考えて決める
+    }
+    
+    // Setup View Layer
+    {
+        [_containerView addSubview:viewController.view];
+        [_containerView insertSubview:_coverShadowView belowSubview:viewController.view];
+        [_containerView insertSubview:_gradationShadowView aboveSubview:_coverShadowView];
+    }
+    
+    // Remove Function
+    void (^removed)() = ^{
+        if ([self _isOver5]) {
+            [_visibleViewController removeFromParentViewController];
+        } else {
             [viewController viewDidAppear:animated];
+            [_visibleViewController viewWillDisappear:animated];
+        }
+        
+        [_visibleViewController.view removeFromSuperview];
+        
+        if (![self _isOver5]) {
+            [_visibleViewController viewDidDisappear:animated];
         }
         _visibleViewController = viewController;
+    };
+    
+    if (animated) {
+        
+        // set positions of start animating.
+        CGRect visibledViewTargetRect = [[_visibleViewController view] frame];
+        visibledViewTargetRect.origin.x = -(_containerView.frame.size.width / 2.);
+        
+        CGRect pushedViewTargetRect = viewController.view.frame;
+        pushedViewTargetRect.origin.x = _containerView.frame.size.width;
+        
+        viewController.view.frame = pushedViewTargetRect;
+        pushedViewTargetRect.origin.x = 0;
+        
+        // shadow
+        CGRect gradationShadowTargetRect = _gradationShadowView.frame;
+        gradationShadowTargetRect.origin.x = -_gradationShadowView.frame.size.width;
+        
+        [UIView animateWithDuration:0.24 delay:0. options:UIViewAnimationOptionCurveEaseInOut animations:^{
+            // View
+            _visibleViewController.view.frame = visibledViewTargetRect;
+            viewController.view.frame = pushedViewTargetRect;
+            
+            // Shadow
+            _coverShadowView.alpha = MaxShadowAlpha;
+            _gradationShadowView.alpha = 1.;
+            _gradationShadowView.frame = gradationShadowTargetRect;
+            
+        } completion:^(BOOL finished) {
+            removed();
+        }];
+    } else {
+        // remove
+        removed();
     }
 }
 
@@ -328,8 +349,6 @@
     
     float moveX = [recognizer translationInView:self.view].x;
     CGRect targetRect = CGRectOffset(_visibleViewController.view.frame, moveX, 0);
-    
-    NSLog(@"%@", NSStringFromCGPoint([recognizer velocityInView:self.view]));
     
     
     // shadow
