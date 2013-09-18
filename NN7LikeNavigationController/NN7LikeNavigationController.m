@@ -77,7 +77,7 @@
 {
     [super viewDidLoad];
     
-    // Pan
+    // Gesture
     {
         _pangestureAreaView = [[PanHandlerView alloc] initWithFrame:self.view.bounds];
         _pangestureAreaView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
@@ -103,14 +103,12 @@
         _gradationShadowView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 10., self.view.bounds.size.height)];
         _gradationShadowView.autoresizingMask =  UIViewAutoresizingFlexibleHeight;
         _gradationShadowView.backgroundColor = [UIColor colorWithPatternImage:[self _gradiation]];
-//        _gradationShadowView.backgroundColor = [UIColor blackColor];
-        
     }
     
+    // Layer
     [self.view addSubview:_containerView];
     [self.view addSubview:_pangestureAreaView];
     [self pushViewController:_topViewController animated:NO];
-    [self.view addSubview:_gradationShadowView];
 }
 
 - (void)viewWillAppear:(BOOL)animated
@@ -208,7 +206,13 @@
 
 - (void)popViewControllerAnimated:(BOOL)animated
 {
+    [self _preparePopUp];
     if (animated) {
+        [self _startPopTransition:^{
+            [_viewControllers removeLastObject];
+            _visibleViewController = _nextVisibleViewController;
+        }];
+    } else {
         
     }
 }
@@ -377,7 +381,6 @@
     CGColorSpaceRef colorSpaceRef = CGColorSpaceCreateDeviceRGB();
     CGFloat components[] = {
         0.0f, 0.0f, 0.0f, 0.3f,     // R, G, B, Alpha
-        //  0.0f, 0.0f, 0.0f, 0.2f,
         0.0f, 0.0f, 0.0f, 0.0f,
     };
     

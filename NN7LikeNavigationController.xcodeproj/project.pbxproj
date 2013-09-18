@@ -25,6 +25,7 @@
 		87AC2FFC17E85CAE008F14C6 /* NN7LikeNavigationController.m in Sources */ = {isa = PBXBuildFile; fileRef = 87AC2FFB17E85CAE008F14C6 /* NN7LikeNavigationController.m */; };
 		87AC300017E9438B008F14C6 /* NN7LikeDemoViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 87AC2FFE17E9438B008F14C6 /* NN7LikeDemoViewController.m */; };
 		87AC300117E9438B008F14C6 /* NN7LikeDemoViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 87AC2FFF17E9438B008F14C6 /* NN7LikeDemoViewController.xib */; };
+		87D3737117E9836B00E7BAA3 /* NN7LikeNavigationBar.m in Sources */ = {isa = PBXBuildFile; fileRef = 87D3737017E9836B00E7BAA3 /* NN7LikeNavigationBar.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -62,6 +63,8 @@
 		87AC2FFD17E9438B008F14C6 /* NN7LikeDemoViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NN7LikeDemoViewController.h; sourceTree = "<group>"; };
 		87AC2FFE17E9438B008F14C6 /* NN7LikeDemoViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NN7LikeDemoViewController.m; sourceTree = "<group>"; };
 		87AC2FFF17E9438B008F14C6 /* NN7LikeDemoViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = NN7LikeDemoViewController.xib; sourceTree = "<group>"; };
+		87D3736F17E9836B00E7BAA3 /* NN7LikeNavigationBar.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NN7LikeNavigationBar.h; sourceTree = "<group>"; };
+		87D3737017E9836B00E7BAA3 /* NN7LikeNavigationBar.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NN7LikeNavigationBar.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -162,6 +165,8 @@
 			children = (
 				87AC2FFA17E85CAE008F14C6 /* NN7LikeNavigationController.h */,
 				87AC2FFB17E85CAE008F14C6 /* NN7LikeNavigationController.m */,
+				87D3736F17E9836B00E7BAA3 /* NN7LikeNavigationBar.h */,
+				87D3737017E9836B00E7BAA3 /* NN7LikeNavigationBar.m */,
 			);
 			path = NN7LikeNavigationController;
 			sourceTree = "<group>";
@@ -282,6 +287,7 @@
 				87AC2FF917E85C12008F14C6 /* NNAppDelegate.m in Sources */,
 				87AC2FFC17E85CAE008F14C6 /* NN7LikeNavigationController.m in Sources */,
 				87AC300017E9438B008F14C6 /* NN7LikeDemoViewController.m in Sources */,
+				87D3737117E9836B00E7BAA3 /* NN7LikeNavigationBar.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
