@@ -8,6 +8,8 @@
 
 #import <UIKit/UIKit.h>
 
+@class NN7LikeNavigationBar;
+
 @interface NN7LikeNavigationController : UIViewController
 
 @property (nonatomic, copy) NSMutableArray *viewControllers;
@@ -22,6 +24,7 @@
 
 @interface UIViewController (NN7LikeNavigationController)
 
+@property (nonatomic, strong) NN7LikeNavigationBar *nn7NavigationBar;
 @property (nonatomic, strong, readonly) NN7LikeNavigationController *nn7NavigationController;
 
 @end

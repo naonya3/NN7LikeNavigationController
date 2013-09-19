@@ -44,9 +44,24 @@
     self.view.backgroundColor = [UIColor colorWithHue:hue saturation:saturation brightness:brightness alpha:1];
 }
 
+- (void)viewWillAppear:(BOOL)animated
+{
+    [super viewWillAppear:animated];
+}
+
 - (void)viewDidAppear:(BOOL)animated
 {
-    
+    [super viewDidAppear:animated];
+}
+
+- (void)viewWillDisappear:(BOOL)animated
+{
+    [super viewWillDisappear:animated];
+}
+
+- (void)viewDidDisappear:(BOOL)animated
+{
+    [super viewDidDisappear:animated];
 }
 
 - (void)didReceiveMemoryWarning
@@ -69,6 +84,11 @@
 - (IBAction)withoutBarButtonTouchHandler:(id)sender
 {
     [self.nn7NavigationController pushViewController:[[NN7LikeDemoViewController alloc] initWithoutBar] animated:YES];
+}
+
+- (void)dealloc
+{
+    NSLog(@"dealloc");
 }
 
 @end

@@ -12,4 +12,8 @@
 
 @property (nonatomic, strong) UIView *contentView;
 
+- (void)pushNavigationContent:(UIView *)content animated:(BOOL)animated;
+- (UIView *)popNavigationContentAnimated:(BOOL)animated;
+
+
 @end

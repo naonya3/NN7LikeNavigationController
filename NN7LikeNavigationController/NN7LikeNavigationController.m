@@ -227,14 +227,15 @@
 
 - (void)popViewControllerAnimated:(BOOL)animated
 {
-    [self _preparePopUp];
+    [self _preparePopUp:animated];
     if (animated) {
         [self _startPopTransition:^{
-            [_viewControllers removeLastObject];
-            _visibleViewController = _nextVisibleViewController;
+            [self _finishPopup:animated];
         }];
     } else {
-        
+        _nextVisibleViewController.view.frame = _containerView.bounds;
+        [_containerView addSubview:_nextVisibleViewController.view];
+        [self _finishPopup:animated];
     }
 }
 
@@ -294,6 +295,16 @@
         _gradationShadowView.frame = shadowRect;
         
     } completion:^(BOOL finished) {
+        
+        [_nextVisibleViewController.view removeFromSuperview];
+        if ([self _isOver5]) {
+            [_nextVisibleViewController removeFromParentViewController];
+        } else {
+            [_nextVisibleViewController viewWillDisappear:YES];
+            [_nextVisibleViewController.view removeFromSuperview];
+            [_nextVisibleViewController viewDidDisappear:YES];
+        }
+        
         if (completionBlock)
             completionBlock();
     }];
@@ -311,14 +322,14 @@
     return NO;
 }
 
-- (void)_preparePopUp
+- (void)_preparePopUp:(BOOL)animated
 {
     _nextVisibleViewController = _viewControllers[_viewControllers.count-2];
     
     if ([self _isOver5]) {
         [self addChildViewController:_nextVisibleViewController];
     } else {
-        [_nextVisibleViewController viewWillAppear:YES];
+        [_nextVisibleViewController viewWillAppear:animated];
     }
     
     _nextVisibleViewController.view.frame = CGRectMake(- (self.view.frame.size.width / 2.), 0, self.view.frame.size.width, self.view.frame.size.height);
@@ -332,13 +343,23 @@
     [_containerView insertSubview:_gradationShadowView aboveSubview:_coverShadowView];
     
     if (![self _isOver5]) {
-        [_nextVisibleViewController viewDidDisappear:YES];
+        [_nextVisibleViewController viewDidDisappear:animated];
     }
 }
 
-- (void)_finishPopup
+- (void)_finishPopup:(BOOL)animated
 {
+    if ([self _isOver5]) {
+        [_visibleViewController.view removeFromSuperview];
+        [_visibleViewController removeFromParentViewController];
+    } else {
+        [_visibleViewController viewWillDisappear:animated];
+        [_visibleViewController.view removeFromSuperview];
+        [_visibleViewController viewDidDisappear:animated];
+    }
     
+    [_viewControllers removeLastObject];
+    _visibleViewController = _nextVisibleViewController;
 }
 
 - (void)_panGestureHandler:(UIPanGestureRecognizer *)recognizer
@@ -361,7 +382,7 @@
     
     if (recognizer.state == UIGestureRecognizerStateBegan) {
         // setup next view controller
-        [self _preparePopUp];
+        [self _preparePopUp:YES];
         _visibleViewController.view.frame = targetRect;
         CGRect nextTargetRect = CGRectOffset(_nextVisibleViewController.view.frame, moveX / 2., 0);
         _nextVisibleViewController.view.frame = nextTargetRect;
@@ -374,10 +395,8 @@
     } else {
         CGPoint point = [recognizer locationInView:self.view];
         if ((point.x > self.view.frame.size.width / 2 && [recognizer velocityInView:self.view].x > - 10) || [recognizer velocityInView:self.view].x > 300) {
-            __unsafe_unretained __block typeof (_viewControllers) weakViewControllers = _viewControllers;
             [self _startPopTransition:^{
-                [weakViewControllers removeLastObject];
-                _visibleViewController = [weakViewControllers lastObject];
+                [self _finishPopup:YES];
             }];
         } else {
             [self _cancelPopTransition:nil];
@@ -399,7 +418,7 @@
     
     CGColorSpaceRef colorSpaceRef = CGColorSpaceCreateDeviceRGB();
     CGFloat components[] = {
-        0.0f, 0.0f, 0.0f, 0.3f,     // R, G, B, Alpha
+        0.0f, 0.0f, 0.0f, 0.3f,
         0.0f, 0.0f, 0.0f, 0.0f,
     };
     

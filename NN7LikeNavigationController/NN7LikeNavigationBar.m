@@ -14,17 +14,14 @@
 {
     self = [super initWithFrame:frame];
     if (self) {
-        self.backgroundColor = [UIColor lightGrayColor];
-        _contentView = [[UIView alloc] initWithFrame:self.bounds];
-        _contentView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
-        [self addSubview:_contentView];
+        
     }
     return self;
 }
 
 - (id)init
 {
-    self = [super init];
+    self = [super initWithFrame:CGRectMake(0, 0, [[UIScreen mainScreen] bounds].size.width, 54.f)];
     if (self) {
         
     }
@@ -33,7 +30,10 @@
 
 - (void)_initialize
 {
-    
+    self.backgroundColor = [UIColor lightGrayColor];
+    _contentView = [[UIView alloc] initWithFrame:self.bounds];
+    _contentView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
+    [self addSubview:_contentView];
 }
 
 @end
