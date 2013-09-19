@@ -32,11 +32,9 @@
 
 @end
 
-
 @interface UIViewController (NN7LikeNavigationControllerSet)
-
 - (void)setNN7NavigationController:(NN7LikeNavigationController *)nn7NavigationController;
-
+- (void)setNN7NavigationnBar:(NN7LikeNavigationBarItem *)nn7NavigationBarItem;
 @end
 
 @interface NN7LikeNavigationController () <UIGestureRecognizerDelegate>
@@ -90,7 +88,9 @@
     
     // Container
     {
-        _containerView = [[UIView alloc] initWithFrame:self.view.bounds];
+        // navigation bar
+        _navigationBar = [[NN7LikeNavigationBar alloc] initWithFrame:CGRectMake(0, 0, self.view.bounds.size.width, 50.)];
+        _containerView = [[UIView alloc] initWithFrame:CGRectMake(0,_navigationBar.frame.size.height, self.view.frame.size.width, self.view.frame.size.height - _navigationBar.frame.size.height)];
         _containerView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
     }
     
@@ -108,6 +108,7 @@
     // Layer
     [self.view addSubview:_containerView];
     [self.view addSubview:_pangestureAreaView];
+    [self.view addSubview:_navigationBar];
     [self pushViewController:_topViewController animated:NO];
 }
 
@@ -454,13 +455,29 @@
     objc_setAssociatedObject(self, _cmd, nn7NavigationController, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
 
+- (void)setNN7NavigationnBar:(NN7LikeNavigationBarItem *)nn7NavigationBarItem;
+{
+    objc_setAssociatedObject(self, _cmd, nn7NavigationBarItem, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+}
+
 @end
 
+static char step;
 @implementation UIViewController (NN7LikeNavigationController)
+
++ (void)load
+{
+    objc_setAssociatedObject([self class], &step, [NN7LikeNavigationBarItem new], OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+}
 
 - (NN7LikeNavigationController *)nn7NavigationController
 {
     return objc_getAssociatedObject(self, @selector(setNN7NavigationController:));
+}
+
+- (NN7LikeNavigationBarItem *)nn7NavigationBarItem
+{
+    return objc_getAssociatedObject(self, &step);
 }
 
 @end

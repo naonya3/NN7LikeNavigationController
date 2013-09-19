@@ -8,13 +8,14 @@
 
 #import <UIKit/UIKit.h>
 
-@class NN7LikeNavigationBar;
+#import "NN7LikeNavigationBar.h"
 
 @interface NN7LikeNavigationController : UIViewController
 
 @property (nonatomic, copy) NSMutableArray *viewControllers;
 @property (nonatomic, strong, readonly) UIViewController *visibleViewController;
 @property (nonatomic, strong, readonly) UIViewController *topViewController;
+@property (nonatomic, strong) NN7LikeNavigationBar *navigationBar;
 
 - (id)initWithRootViewController:(UIViewController *)viewController;
 - (void)pushViewController:(UIViewController *)viewController animated:(BOOL)animated;
@@ -24,7 +25,8 @@
 
 @interface UIViewController (NN7LikeNavigationController)
 
-@property (nonatomic, strong) NN7LikeNavigationBar *nn7NavigationBar;
+
+@property (nonatomic, strong, readonly) NN7LikeNavigationBarItem *nn7NavigationBarItem;
 @property (nonatomic, strong, readonly) NN7LikeNavigationController *nn7NavigationController;
 
 @end

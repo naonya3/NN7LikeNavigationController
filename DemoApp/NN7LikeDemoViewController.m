@@ -16,9 +16,9 @@
 
 - (id)initWithBar
 {
-    self = [super init];
+    self = [super initWithNibName:@"NN7LikeDemoViewController" bundle:nil];
     if (self) {
-        self.navigationItem.title = @"hoge";
+        
     }
     return self;
 }
@@ -42,6 +42,7 @@
     CGFloat saturation = ( arc4random() % 128 / 256.0 ) + 0.5;
     CGFloat brightness = ( arc4random() % 128 / 256.0 ) + 0.5;
     self.view.backgroundColor = [UIColor colorWithHue:hue saturation:saturation brightness:brightness alpha:1];
+    [self.nn7NavigationBarItem hoge];
 }
 
 - (void)viewWillAppear:(BOOL)animated

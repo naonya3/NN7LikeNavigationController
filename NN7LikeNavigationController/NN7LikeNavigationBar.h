@@ -11,9 +11,15 @@
 @interface NN7LikeNavigationBar : UIView
 
 @property (nonatomic, strong) UIView *contentView;
+@property (nonatomic, strong) UIView *backgroundView;
 
 - (void)pushNavigationContent:(UIView *)content animated:(BOOL)animated;
 - (UIView *)popNavigationContentAnimated:(BOOL)animated;
 
+@end
+
+@interface NN7LikeNavigationBarItem : NSObject
+
+- (void)hoge;
 
 @end

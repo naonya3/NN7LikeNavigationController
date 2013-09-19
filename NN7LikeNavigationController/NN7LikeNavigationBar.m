@@ -14,7 +14,7 @@
 {
     self = [super initWithFrame:frame];
     if (self) {
-        
+        [self _initialize];
     }
     return self;
 }
@@ -23,7 +23,7 @@
 {
     self = [super initWithFrame:CGRectMake(0, 0, [[UIScreen mainScreen] bounds].size.width, 54.f)];
     if (self) {
-        
+        [self _initialize];
     }
     return self;
 }
@@ -34,6 +34,16 @@
     _contentView = [[UIView alloc] initWithFrame:self.bounds];
     _contentView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
     [self addSubview:_contentView];
+}
+
+@end
+
+
+@implementation NN7LikeNavigationBarItem
+
+- (void)hoge
+{
+    NSLog(@"hoge");
 }
 
 @end
