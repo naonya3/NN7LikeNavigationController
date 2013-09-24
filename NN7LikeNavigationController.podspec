@@ -61,7 +61,7 @@ Pod::Spec.new do |s|
   #  Supports git, hg, svn and HTTP.
   #
 
-  s.source       = { :git => "http://EXAMPLE/NN7LikeNavigationController.git", :tag => "0.0.1" }
+  s.source       = { :git => "ssh://git@bitbucket.org/naonya3/nn7likenavigationcontroller.git"}
 
 
   # ――― Source Code ―――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――― #
