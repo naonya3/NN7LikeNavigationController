@@ -39,11 +39,11 @@
 @end
 
 
-@implementation NN7LikeNavigationBarItem
+//@implementation NN7LikeNavigationBarItem
 
-- (void)hoge
-{
-    NSLog(@"hoge");
-}
+//- (void)hoge
+//{
+//    NSLog(@"hoge");
+//}
 
-@end
+//@end

@@ -34,7 +34,7 @@
 
 @interface UIViewController (NN7LikeNavigationControllerSet)
 - (void)setNN7NavigationController:(NN7LikeNavigationController *)nn7NavigationController;
-- (void)setNN7NavigationnBar:(NN7LikeNavigationBarItem *)nn7NavigationBarItem;
+//- (void)setNN7NavigationnBar:(NN7LikeNavigationBarItem *)nn7NavigationBarItem;
 @end
 
 @interface NN7LikeNavigationController () <UIGestureRecognizerDelegate>
@@ -455,29 +455,29 @@
     objc_setAssociatedObject(self, _cmd, nn7NavigationController, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
 
-- (void)setNN7NavigationnBar:(NN7LikeNavigationBarItem *)nn7NavigationBarItem;
-{
-    objc_setAssociatedObject(self, _cmd, nn7NavigationBarItem, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
-}
+//- (void)setNN7NavigationnBar:(NN7LikeNavigationBarItem *)nn7NavigationBarItem;
+//{
+//    objc_setAssociatedObject(self, _cmd, nn7NavigationBarItem, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+//}
 
 @end
 
-static char step;
 @implementation UIViewController (NN7LikeNavigationController)
 
-+ (void)load
-{
-    objc_setAssociatedObject([self class], &step, [NN7LikeNavigationBarItem new], OBJC_ASSOCIATION_RETAIN_NONATOMIC);
-}
+//+ (id)alloc
+//{
+//    id ins = [super alloc];
+//    objc_setAssociatedObject(self, @selector(nn7NavigationBarItem), [NN7LikeNavigationBar new], OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+//}
 
 - (NN7LikeNavigationController *)nn7NavigationController
 {
     return objc_getAssociatedObject(self, @selector(setNN7NavigationController:));
 }
 
-- (NN7LikeNavigationBarItem *)nn7NavigationBarItem
-{
-    return objc_getAssociatedObject(self, &step);
-}
+//- (NN7LikeNavigationBarItem *)nn7NavigationBarItem
+//{
+//    return objc_getAssociatedObject(self, &step);
+//}
 
 @end
