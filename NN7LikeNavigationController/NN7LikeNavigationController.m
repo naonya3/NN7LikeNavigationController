@@ -146,12 +146,8 @@
     {
         toViewController.view.frame = _containerView.bounds;
         toViewController.view.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
-        
-        if ([self _isOver5]) {
-            [self addChildViewController:toViewController];
-        } else {
-            [toViewController viewWillAppear:animated];
-        }
+        [self addChildViewController:toViewController];
+        [toViewController viewWillAppear:animated];
     }
     
     // Prepare Shadow
@@ -175,18 +171,8 @@
     
     // Remove Function
     void (^removed)() = ^{
-        if ([self _isOver5]) {
-            [_visibleViewController removeFromParentViewController];
-        } else {
-            [toViewController viewDidAppear:animated];
-            [_visibleViewController viewWillDisappear:animated];
-        }
-        
+        [_visibleViewController removeFromParentViewController];
         [_visibleViewController.view removeFromSuperview];
-        
-        if (![self _isOver5]) {
-            [_visibleViewController viewDidDisappear:animated];
-        }
         _visibleViewController = toViewController;
     };
     
@@ -237,11 +223,6 @@
         [_containerView addSubview:_nextVisibleViewController.view];
         [self _finishPopup:animated];
     }
-}
-
-- (BOOL)_isOver5
-{
-    return [[UIDevice currentDevice].systemVersion floatValue] >= 5.;
 }
 
 - (void)_startPopTransition:(void(^)())completionBlock
@@ -297,13 +278,7 @@
     } completion:^(BOOL finished) {
         
         [_nextVisibleViewController.view removeFromSuperview];
-        if ([self _isOver5]) {
-            [_nextVisibleViewController removeFromParentViewController];
-        } else {
-            [_nextVisibleViewController viewWillDisappear:YES];
-            [_nextVisibleViewController.view removeFromSuperview];
-            [_nextVisibleViewController viewDidDisappear:YES];
-        }
+        [_nextVisibleViewController removeFromParentViewController];
         
         if (completionBlock)
             completionBlock();
@@ -326,11 +301,7 @@
 {
     _nextVisibleViewController = _viewControllers[_viewControllers.count-2];
     
-    if ([self _isOver5]) {
-        [self addChildViewController:_nextVisibleViewController];
-    } else {
-        [_nextVisibleViewController viewWillAppear:animated];
-    }
+    [self addChildViewController:_nextVisibleViewController];
     
     _nextVisibleViewController.view.frame = CGRectMake(- (self.view.frame.size.width / 2.), 0, self.view.frame.size.width, self.view.frame.size.height);
     [_containerView insertSubview:_nextVisibleViewController.view belowSubview:_visibleViewController.view];
@@ -341,22 +312,12 @@
     _gradationShadowView.frame = rect;
     [_containerView insertSubview:_coverShadowView aboveSubview:_nextVisibleViewController.view];
     [_containerView insertSubview:_gradationShadowView aboveSubview:_coverShadowView];
-    
-    if (![self _isOver5]) {
-        [_nextVisibleViewController viewDidDisappear:animated];
-    }
 }
 
 - (void)_finishPopup:(BOOL)animated
 {
-    if ([self _isOver5]) {
-        [_visibleViewController.view removeFromSuperview];
-        [_visibleViewController removeFromParentViewController];
-    } else {
-        [_visibleViewController viewWillDisappear:animated];
-        [_visibleViewController.view removeFromSuperview];
-        [_visibleViewController viewDidDisappear:animated];
-    }
+    [_visibleViewController.view removeFromSuperview];
+    [_visibleViewController removeFromParentViewController];
     
     [_viewControllers removeLastObject];
     _visibleViewController = _nextVisibleViewController;
@@ -405,8 +366,6 @@
     [recognizer setTranslation:CGPointZero inView:self.view];
 }
 
-
-// TODO: 4.3でキモイ（4.3でグラデーションがかからない）
 - (UIImage *)_gradiation
 {
     UIGraphicsBeginImageContext(CGSizeMake(10, 10));
