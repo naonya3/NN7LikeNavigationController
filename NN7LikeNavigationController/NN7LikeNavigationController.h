@@ -26,7 +26,7 @@
 @interface UIViewController (NN7LikeNavigationController)
 
 
-//@property (nonatomic, strong, readonly) NN7LikeNavigationBarItem *nn7NavigationBarItem;
+@property (nonatomic, strong) NN7LikeNavigationBar *nn7NavigationBar;
 @property (nonatomic, strong, readonly) NN7LikeNavigationController *nn7NavigationController;
 
 @end

@@ -15,7 +15,6 @@
 
 
 // TODO: blocksのなかで_visibleControllerにアクセスしてしまっているものをどうにかしてなおす
-
 @interface PanHandlerView : UIView
 
 @end
@@ -132,26 +131,26 @@
     [super viewDidDisappear:animated];
 }
 
-- (void)pushViewController:(UIViewController *)viewController animated:(BOOL)animated
+- (void)pushViewController:(UIViewController *)toViewController animated:(BOOL)animated
 {
-    [_viewControllers addObject:viewController];
+    [_viewControllers addObject:toViewController];
     
     // Setup next ViewController
     {
-        [viewController setNN7NavigationController:self];
+        [toViewController setNN7NavigationController:self];
         
         // TODO: setup navigationBar
     }
     
     // Prepare next viewController
     {
-        viewController.view.frame = _containerView.bounds;
-        viewController.view.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
+        toViewController.view.frame = _containerView.bounds;
+        toViewController.view.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
         
         if ([self _isOver5]) {
-            [self addChildViewController:viewController];
+            [self addChildViewController:toViewController];
         } else {
-            [viewController viewWillAppear:animated];
+            [toViewController viewWillAppear:animated];
         }
     }
     
@@ -169,8 +168,8 @@
     
     // Setup View Layer
     {
-        [_containerView addSubview:viewController.view];
-        [_containerView insertSubview:_coverShadowView belowSubview:viewController.view];
+        [_containerView addSubview:toViewController.view];
+        [_containerView insertSubview:_coverShadowView belowSubview:toViewController.view];
         [_containerView insertSubview:_gradationShadowView aboveSubview:_coverShadowView];
     }
     
@@ -179,7 +178,7 @@
         if ([self _isOver5]) {
             [_visibleViewController removeFromParentViewController];
         } else {
-            [viewController viewDidAppear:animated];
+            [toViewController viewDidAppear:animated];
             [_visibleViewController viewWillDisappear:animated];
         }
         
@@ -188,7 +187,7 @@
         if (![self _isOver5]) {
             [_visibleViewController viewDidDisappear:animated];
         }
-        _visibleViewController = viewController;
+        _visibleViewController = toViewController;
     };
     
     if (animated) {
@@ -197,10 +196,10 @@
         CGRect visibledViewTargetRect = [[_visibleViewController view] frame];
         visibledViewTargetRect.origin.x = -(_containerView.frame.size.width / 2.);
         
-        CGRect pushedViewTargetRect = viewController.view.frame;
+        CGRect pushedViewTargetRect = toViewController.view.frame;
         pushedViewTargetRect.origin.x = _containerView.frame.size.width;
         
-        viewController.view.frame = pushedViewTargetRect;
+        toViewController.view.frame = pushedViewTargetRect;
         pushedViewTargetRect.origin.x = 0;
         
         // shadow
@@ -210,7 +209,7 @@
         [UIView animateWithDuration:0.24 delay:0. options:UIViewAnimationOptionCurveEaseInOut animations:^{
             // View
             _visibleViewController.view.frame = visibledViewTargetRect;
-            viewController.view.frame = pushedViewTargetRect;
+            toViewController.view.frame = pushedViewTargetRect;
             
             // Shadow
             _coverShadowView.alpha = MaxShadowAlpha;
@@ -372,7 +371,6 @@
     float moveX = [recognizer translationInView:self.view].x;
     CGRect targetRect = CGRectOffset(_visibleViewController.view.frame, moveX, 0);
     
-    
     // shadow
     CGRect shadowRect = _gradationShadowView.frame;
     shadowRect.origin.x = targetRect.origin.x - shadowRect.size.width;
@@ -455,29 +453,24 @@
     objc_setAssociatedObject(self, _cmd, nn7NavigationController, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
 
-//- (void)setNN7NavigationnBar:(NN7LikeNavigationBarItem *)nn7NavigationBarItem;
-//{
-//    objc_setAssociatedObject(self, _cmd, nn7NavigationBarItem, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
-//}
-
 @end
 
 @implementation UIViewController (NN7LikeNavigationController)
-
-//+ (id)alloc
-//{
-//    id ins = [super alloc];
-//    objc_setAssociatedObject(self, @selector(nn7NavigationBarItem), [NN7LikeNavigationBar new], OBJC_ASSOCIATION_RETAIN_NONATOMIC);
-//}
 
 - (NN7LikeNavigationController *)nn7NavigationController
 {
     return objc_getAssociatedObject(self, @selector(setNN7NavigationController:));
 }
 
-//- (NN7LikeNavigationBarItem *)nn7NavigationBarItem
-//{
-//    return objc_getAssociatedObject(self, &step);
-//}
+- (void)setNn7NavigationBar:(NN7LikeNavigationBar *)nn7NavigationBar
+{
+    objc_setAssociatedObject(self, _cmd, nn7NavigationBar, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+}
+
+- (NN7LikeNavigationBar *)nn7NavigationBar
+{
+    return objc_getAssociatedObject(self, @selector(setNn7NavigationBar:));
+}
+
 
 @end
