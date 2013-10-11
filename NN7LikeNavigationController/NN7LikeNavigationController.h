@@ -12,8 +12,10 @@
 
 @interface NN7LikeNavigationController : UIViewController
 
-@property (nonatomic, copy) NSMutableArray *viewContainers;
+//@property (nonatomic, copy) NSMutableArray *viewContainers;
 @property (nonatomic, strong, readonly) UIViewController *topViewController;
+@property (nonatomic, strong, readonly) UIViewController *visibleViewContorller;
+
 
 - (id)initWithRootViewController:(UIViewController *)viewController;
 - (void)pushViewController:(UIViewController *)viewController animated:(BOOL)animated;

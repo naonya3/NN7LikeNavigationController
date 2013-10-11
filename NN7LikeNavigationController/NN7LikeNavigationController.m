@@ -26,7 +26,6 @@
 - (void)setViewController:(UIViewController *)viewController parentViewController:(UIViewController *)parentViewController;
 - (void)removeFromSuperviewAndParentViewController;
 
-
 @end
 
 @implementation NNViewControllerContainer
@@ -106,7 +105,7 @@
 
 @interface NN7LikeNavigationController () <UIGestureRecognizerDelegate>
 {
-
+    
 }
 
 - (void)_panGestureHandler:(UIPanGestureRecognizer *)recognizer;
@@ -122,6 +121,7 @@
     
     //子ViewControllerを表示するコンテナ
     UIView *_contentView;
+    NSMutableArray *_viewContainers;
 
     NNViewControllerContainer *_visibleContainer;
 
@@ -273,6 +273,10 @@
 
 - (void)popViewControllerAnimated:(BOOL)animated
 {
+    if (_viewContainers.count <= 1) {
+        return;
+    }
+    
     NNViewControllerContainer *toViewContainer = _viewContainers[_viewContainers.count - 2];
     NNViewControllerContainer *fromViewContainer = _visibleContainer;
     
@@ -353,6 +357,11 @@
         if (completionBlock)
             completionBlock();
     }];
+}
+
+- (UIViewController *)visibleViewContorller
+{
+    return _visibleContainer.viewController;
 }
 
 #pragma mark - Gesture
