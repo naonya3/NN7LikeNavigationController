@@ -18,7 +18,7 @@
 {
     self = [super initWithNibName:@"NN7LikeDemoViewController" bundle:nil];
     if (self) {
-        
+        self.nn7NavigationBar = [[NN7LikeNavigationBar alloc] init];
     }
     return self;
 }

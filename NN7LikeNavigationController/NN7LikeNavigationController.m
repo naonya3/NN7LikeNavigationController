@@ -13,8 +13,6 @@
 #define PanAreaSize 30.
 #define MaxShadowAlpha .30
 
-
-// TODO: blocksのなかで_visibleControllerにアクセスしてしまっているものをどうにかしてなおす
 @interface PanHandlerView : UIView
 
 @end
@@ -33,7 +31,6 @@
 
 @interface UIViewController (NN7LikeNavigationControllerSet)
 - (void)setNN7NavigationController:(NN7LikeNavigationController *)nn7NavigationController;
-//- (void)setNN7NavigationnBar:(NN7LikeNavigationBarItem *)nn7NavigationBarItem;
 @end
 
 @interface NN7LikeNavigationController () <UIGestureRecognizerDelegate>
@@ -55,7 +52,10 @@
     //子ViewControllerを表示するコンテナ
     UIView *_containerView;
     
-    UIViewController *_nextVisibleViewController;
+    UIView *_visibleContainer;
+    UIView *_processToViewContainer;
+    UIView *_processFromViewContainer;
+    
     UIView *_coverShadowView;
     UIView *_gradationShadowView;
 }
@@ -88,8 +88,9 @@
     // Container
     {
         // navigation bar
-        _navigationBar = [[NN7LikeNavigationBar alloc] initWithFrame:CGRectMake(0, 0, self.view.bounds.size.width, 50.)];
-        _containerView = [[UIView alloc] initWithFrame:CGRectMake(0,_navigationBar.frame.size.height, self.view.frame.size.width, self.view.frame.size.height - _navigationBar.frame.size.height)];
+        //_navigationBar = [[NN7LikeNavigationBar alloc] init];
+        
+        _containerView = [[UIView alloc] initWithFrame:self.view.bounds];
         _containerView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
     }
     
@@ -106,8 +107,7 @@
     
     // Layer
     [self.view addSubview:_containerView];
-    [self.view addSubview:_pangestureAreaView];
-    [self.view addSubview:_navigationBar];
+    [self.view addSubview:_pangestureAreaView];;
     [self pushViewController:_topViewController animated:NO];
 }
 
@@ -135,26 +135,18 @@
 {
     [_viewControllers addObject:toViewController];
     
+    UIView *toViewContainer;
     // Setup next ViewController
     {
         [toViewController setNN7NavigationController:self];
-        
-        // TODO: setup navigationBar
-    }
-    
-    // Prepare next viewController
-    {
-        toViewController.view.frame = _containerView.bounds;
-        toViewController.view.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
-        [self addChildViewController:toViewController];
-        [toViewController viewWillAppear:animated];
+        toViewContainer = [self _createContainerFromViewController:toViewController];
     }
     
     // Prepare Shadow
     {
         _coverShadowView.alpha = 0.;
         _gradationShadowView.alpha = 0.;
-        _gradationShadowView.frame = CGRectMake(_containerView.frame.size.width - _gradationShadowView.frame.size.width,
+        _gradationShadowView.frame = CGRectMake(toViewContainer.frame.size.width - _gradationShadowView.frame.size.width,
                                                 0,
                                                 _gradationShadowView.frame.size.width,
                                                 _gradationShadowView.frame.size.height);
@@ -164,28 +156,28 @@
     
     // Setup View Layer
     {
-        [_containerView addSubview:toViewController.view];
-        [_containerView insertSubview:_coverShadowView belowSubview:toViewController.view];
+        [_containerView addSubview:toViewContainer];
+        [_containerView insertSubview:_coverShadowView belowSubview:toViewContainer];
         [_containerView insertSubview:_gradationShadowView aboveSubview:_coverShadowView];
     }
     
     // Remove Function
     void (^removed)() = ^{
         [_visibleViewController removeFromParentViewController];
-        [_visibleViewController.view removeFromSuperview];
+        [_visibleContainer removeFromSuperview];
         _visibleViewController = toViewController;
+        _visibleContainer = toViewContainer;
     };
     
     if (animated) {
-        
         // set positions of start animating.
-        CGRect visibledViewTargetRect = [[_visibleViewController view] frame];
+        CGRect visibledViewTargetRect = [_visibleContainer frame];
         visibledViewTargetRect.origin.x = -(_containerView.frame.size.width / 2.);
         
-        CGRect pushedViewTargetRect = toViewController.view.frame;
+        CGRect pushedViewTargetRect = toViewContainer.frame;
         pushedViewTargetRect.origin.x = _containerView.frame.size.width;
         
-        toViewController.view.frame = pushedViewTargetRect;
+        toViewContainer.frame = pushedViewTargetRect;
         pushedViewTargetRect.origin.x = 0;
         
         // shadow
@@ -194,8 +186,8 @@
         
         [UIView animateWithDuration:0.24 delay:0. options:UIViewAnimationOptionCurveEaseInOut animations:^{
             // View
-            _visibleViewController.view.frame = visibledViewTargetRect;
-            toViewController.view.frame = pushedViewTargetRect;
+            _visibleContainer.frame = visibledViewTargetRect;
+            toViewContainer.frame = pushedViewTargetRect;
             
             // Shadow
             _coverShadowView.alpha = MaxShadowAlpha;
@@ -211,27 +203,73 @@
     }
 }
 
+
+- (UIView *)_createContainerFromViewController:(UIViewController *)viewController
+{
+    [self addChildViewController:viewController];
+    
+    UIView *container = [[UIView alloc] initWithFrame:self.view.bounds];
+    NN7LikeNavigationBar *navigationbar = viewController.nn7NavigationBar;
+    if (navigationbar) {
+        navigationbar.frame = (CGRect){
+            .origin.x = 0,
+            .origin.y = 0,
+            .size = navigationbar.frame.size
+        };
+        navigationbar.autoresizingMask = UIViewAutoresizingNone | UIViewAutoresizingFlexibleWidth;
+        
+        viewController.view.frame = (CGRect){
+            .origin.x = 0,
+            .origin.y = navigationbar.frame.size.height,
+            .size.width = CGRectGetWidth(viewController.view.frame),
+            .size.height = CGRectGetHeight(self.view.frame) - CGRectGetHeight(navigationbar.frame)
+        };
+        viewController.view.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
+        [container addSubview:navigationbar];
+        [container addSubview:viewController.view];
+    } else {
+        viewController.view.frame = (CGRect){
+            .origin.x = 0,
+            .origin.y = 0,
+            .size = viewController.view.frame.size
+        };
+        viewController.view.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
+        [container addSubview:viewController.view];
+    }
+    
+    return container;
+}
+
 - (void)popViewControllerAnimated:(BOOL)animated
 {
-    [self _preparePopUp:animated];
+    UIViewController *toViewController = _viewControllers[_viewControllers.count - 2];
+    UIViewController *fromViewController = _visibleViewController;
+    
+    [self _preparePopUpFromViewController:fromViewController toViewController:toViewController];
     if (animated) {
         [self _startPopTransition:^{
-            [self _finishPopup:animated];
+            [self _finishPopupFromViewController:fromViewController toViewController:toViewController];
         }];
     } else {
-        _nextVisibleViewController.view.frame = _containerView.bounds;
-        [_containerView addSubview:_nextVisibleViewController.view];
-        [self _finishPopup:animated];
+        toViewController.view.frame = _containerView.bounds;
+        [_containerView addSubview:toViewController.view];
+        [self _finishPopupFromViewController:fromViewController toViewController:toViewController];
     }
 }
 
 - (void)_startPopTransition:(void(^)())completionBlock
 {
-    CGRect rect = _visibleViewController.view.frame;
+    UIViewController *toViewController = _viewControllers[_viewControllers.count - 2];
+    UIViewController *fromViewController = _visibleViewController;
+    
+    UIView *fromViewContainer = _visibleContainer;
+    UIView *toViewContainer = _processToViewContainer;
+    
+    CGRect rect = fromViewContainer.frame;
     rect.origin.x = self.view.frame.size.width;
     rect.origin.y = 0;
     
-    CGRect next = _nextVisibleViewController.view.frame;
+    CGRect next = toViewController.view.frame;
     next.origin.x = 0;
     next.origin.y = 0;
     
@@ -239,8 +277,8 @@
     shadowRect.origin.x = _containerView.frame.size.width - _gradationShadowView.frame.size.width;
     
     [UIView animateWithDuration:0.24 delay:0. options:UIViewAnimationOptionCurveEaseOut animations:^{
-        _visibleViewController.view.frame = rect;
-        _nextVisibleViewController.view.frame = next;
+        fromViewContainer.frame = rect;
+        toViewContainer.frame = next;
         
         // shadow
         _coverShadowView.alpha = 0.;
@@ -255,11 +293,17 @@
 
 - (void)_cancelPopTransition:(void(^)())completionBlock
 {
-    CGRect rect = _visibleViewController.view.frame;
+    UIViewController *toViewController = _viewControllers[_viewControllers.count - 2];
+    UIViewController *fromViewController = _visibleViewController;
+    
+    UIView *fromViewContainer = _visibleContainer;
+    UIView *toViewContainer = _processToViewContainer;
+    
+    CGRect rect = fromViewController.view.frame;
     rect.origin.x = 0;
     rect.origin.y = 0;
     
-    CGRect next = _nextVisibleViewController.view.frame;
+    CGRect next = toViewController.view.frame;
     next.origin.x = - self.view.frame.size.width / 2.;
     next.origin.y = 0;
     
@@ -267,8 +311,8 @@
     shadowRect.origin.x = -_gradationShadowView.frame.size.width;
     
     [UIView animateWithDuration:0.24 delay:0. options:UIViewAnimationOptionCurveEaseOut animations:^{
-        _visibleViewController.view.frame = rect;
-        _nextVisibleViewController.view.frame = next;
+        fromViewContainer.frame = rect;
+        toViewContainer.frame = next;
         
         // shadow
         _coverShadowView.alpha = MaxShadowAlpha;
@@ -277,8 +321,8 @@
         
     } completion:^(BOOL finished) {
         
-        [_nextVisibleViewController.view removeFromSuperview];
-        [_nextVisibleViewController removeFromParentViewController];
+        [toViewContainer removeFromSuperview];
+        [toViewController removeFromParentViewController];
         
         if (completionBlock)
             completionBlock();
@@ -297,30 +341,30 @@
     return NO;
 }
 
-- (void)_preparePopUp:(BOOL)animated
+- (void)_preparePopUpFromViewController:(UIViewController *)fromViewController toViewController:(UIViewController *)toViewController
 {
-    _nextVisibleViewController = _viewControllers[_viewControllers.count-2];
+    [self addChildViewController:toViewController];
     
-    [self addChildViewController:_nextVisibleViewController];
+    _processToViewContainer = [self _createContainerFromViewController:toViewController];
     
-    _nextVisibleViewController.view.frame = CGRectMake(- (self.view.frame.size.width / 2.), 0, self.view.frame.size.width, self.view.frame.size.height);
-    [_containerView insertSubview:_nextVisibleViewController.view belowSubview:_visibleViewController.view];
+    _processToViewContainer.frame = CGRectMake(- (self.view.frame.size.width / 2.), 0, self.view.frame.size.width, self.view.frame.size.height);
+    [_containerView insertSubview:_processToViewContainer belowSubview:_visibleContainer];
     
     // shadow
     CGRect rect = _gradationShadowView.frame;
     rect.origin.x = -_gradationShadowView.frame.size.width;
     _gradationShadowView.frame = rect;
-    [_containerView insertSubview:_coverShadowView aboveSubview:_nextVisibleViewController.view];
+    [_containerView insertSubview:_coverShadowView aboveSubview:_processToViewContainer];
     [_containerView insertSubview:_gradationShadowView aboveSubview:_coverShadowView];
 }
 
-- (void)_finishPopup:(BOOL)animated
+- (void)_finishPopupFromViewController:(UIViewController *)fromViewController toViewController:(UIViewController *)toViewController
 {
-    [_visibleViewController.view removeFromSuperview];
-    [_visibleViewController removeFromParentViewController];
-    
+    [fromViewController.view removeFromSuperview];
+    [fromViewController removeFromParentViewController];
     [_viewControllers removeLastObject];
-    _visibleViewController = _nextVisibleViewController;
+    _visibleViewController = toViewController;
+    _visibleContainer = _processToViewContainer;
 }
 
 - (void)_panGestureHandler:(UIPanGestureRecognizer *)recognizer
@@ -329,34 +373,44 @@
         return;
     }
     
+    UIViewController *toViewController = _viewControllers[_viewControllers.count - 2];
+    UIViewController *fromViewController = _visibleViewController;
+    
+    
+    UIView *toViewContainer = _processToViewContainer;
+    UIView *fromViewContainer = _visibleContainer;
+    
     float moveX = [recognizer translationInView:self.view].x;
-    CGRect targetRect = CGRectOffset(_visibleViewController.view.frame, moveX, 0);
+    CGRect targetRect = CGRectOffset(fromViewContainer.frame, moveX, 0);
     
     // shadow
     CGRect shadowRect = _gradationShadowView.frame;
     shadowRect.origin.x = targetRect.origin.x - shadowRect.size.width;
     _gradationShadowView.frame = shadowRect;
     
-    _coverShadowView.alpha = MaxShadowAlpha * (1. - _visibleViewController.view.frame.origin.x / self.view.frame.size.width);
-    _gradationShadowView.alpha = 1. - _visibleViewController.view.frame.origin.x / self.view.frame.size.width;
+    _coverShadowView.alpha = MaxShadowAlpha * (1. - fromViewContainer.frame.origin.x / self.view.frame.size.width);
+    _gradationShadowView.alpha = 1. - fromViewContainer.frame.origin.x / self.view.frame.size.width;
     
     if (recognizer.state == UIGestureRecognizerStateBegan) {
         // setup next view controller
-        [self _preparePopUp:YES];
-        _visibleViewController.view.frame = targetRect;
-        CGRect nextTargetRect = CGRectOffset(_nextVisibleViewController.view.frame, moveX / 2., 0);
-        _nextVisibleViewController.view.frame = nextTargetRect;
+        [self _preparePopUpFromViewController:fromViewController toViewController:toViewController];
+        toViewContainer = _processToViewContainer;
+        
+        fromViewContainer.frame = targetRect;
+        CGRect nextTargetRect = CGRectOffset(toViewContainer.frame, moveX / 2., 0);
+        toViewContainer.frame = nextTargetRect;
         
     } else if (recognizer.state == UIGestureRecognizerStateChanged) {
-        _visibleViewController.view.frame = targetRect;
-        CGRect nextTargetRect = CGRectOffset(_nextVisibleViewController.view.frame, moveX / 2., 0);
-        _nextVisibleViewController.view.frame = nextTargetRect;
+        
+        fromViewContainer.frame = targetRect;
+        CGRect nextTargetRect = CGRectOffset(toViewContainer.frame, moveX / 2., 0);
+        toViewContainer.frame = nextTargetRect;
         
     } else {
         CGPoint point = [recognizer locationInView:self.view];
         if ((point.x > self.view.frame.size.width / 2 && [recognizer velocityInView:self.view].x > - 10) || [recognizer velocityInView:self.view].x > 300) {
             [self _startPopTransition:^{
-                [self _finishPopup:YES];
+                [self _finishPopupFromViewController:fromViewController toViewController:toViewController];
             }];
         } else {
             [self _cancelPopTransition:nil];
@@ -430,6 +484,5 @@
 {
     return objc_getAssociatedObject(self, @selector(setNn7NavigationBar:));
 }
-
 
 @end
