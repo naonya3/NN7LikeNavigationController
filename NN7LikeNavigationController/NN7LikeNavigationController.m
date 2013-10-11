@@ -17,6 +17,68 @@
 
 @end
 
+@interface NNViewControllerContainer : UIView
+
+@property (nonatomic, strong, readonly) UIViewController *viewController;
+
+- (id)initWithViewController:(UIViewController *)viewController parentViewController:(UIViewController *)parentViewController;
+- (void)setViewController:(UIViewController *)viewController parentViewController:(UIViewController *)parentViewController;
+- (void)removeFromSuperview;
+
+@end
+
+@implementation NNViewControllerContainer
+
+- (id)initWithViewController:(UIViewController *)viewController parentViewController:(UIViewController *)parentViewController
+{
+    self = [super init];
+    if (self) {
+        [self setViewController:viewController parentViewController:parentViewController];
+    }
+    return self;
+}
+
+- (void)removeFromSuperview
+{
+    [super removeFromSuperview];
+    [self.viewController removeFromParentViewController];
+}
+
+- (void)setViewController:(UIViewController *)viewController parentViewController:(UIViewController *)parentViewController
+{
+    _viewController = viewController;
+    [parentViewController addChildViewController:viewController];
+    NN7LikeNavigationBar *navigationbar = viewController.nn7NavigationBar;
+    if (navigationbar) {
+        navigationbar.frame = (CGRect){
+            .origin.x = 0,
+            .origin.y = 0,
+            .size = navigationbar.frame.size
+        };
+        navigationbar.autoresizingMask = UIViewAutoresizingNone | UIViewAutoresizingFlexibleWidth;
+        
+        viewController.view.frame = (CGRect){
+            .origin.x = 0,
+            .origin.y = navigationbar.frame.size.height,
+            .size.width = CGRectGetWidth(viewController.view.frame),
+            .size.height = CGRectGetHeight(self.frame) - CGRectGetHeight(navigationbar.frame)
+        };
+        viewController.view.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
+        [self addSubview:navigationbar];
+        [self addSubview:viewController.view];
+    } else {
+        viewController.view.frame = (CGRect){
+            .origin.x = 0,
+            .origin.y = 0,
+            .size = viewController.view.frame.size
+        };
+        viewController.view.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
+        [self addSubview:viewController.view];
+    }
+}
+
+@end
+
 @implementation PanHandlerView
 
 - (UIView *)hitTest:(CGPoint)point withEvent:(UIEvent *)event
