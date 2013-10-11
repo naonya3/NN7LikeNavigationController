@@ -71,9 +71,7 @@
 
 - (IBAction)backButtonTouchHandler:(id)sender
 {
-    if (self.nn7NavigationController.viewControllers.count > 1) {
-        [self.nn7NavigationController popViewControllerAnimated:YES];
-    }
+    [self.nn7NavigationController popViewControllerAnimated:YES];
 }
 
 - (IBAction)withBarButtonTouchHandler:(id)sender
