@@ -25,6 +25,7 @@
 - (id)initWithViewController:(UIViewController *)viewController parentViewController:(UIViewController *)parentViewController;
 - (void)setViewController:(UIViewController *)viewController parentViewController:(UIViewController *)parentViewController;
 - (void)removeFromSuperviewAndParentViewController;
+- (CGRect)contentFrame;
 
 @end
 
@@ -83,6 +84,11 @@
         viewController.view.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
         [self addSubview:viewController.view];
     }
+}
+
+- (CGRect)contentFrame
+{
+    return _viewController.view.frame;
 }
 
 @end
@@ -215,13 +221,14 @@
     // Prepare Shadow
     {
         _coverShadowView.alpha = 0.;
+        _coverShadowView.frame = [_visibleContainer contentFrame];
+        
         _gradationShadowView.alpha = 0.;
         _gradationShadowView.frame = CGRectMake(toViewContainer.frame.size.width - _gradationShadowView.frame.size.width,
-                                                0,
-                                                _gradationShadowView.frame.size.width,
-                                                _gradationShadowView.frame.size.height);
+                                                CGRectGetMinY([_visibleContainer contentFrame]),
+                                                CGRectGetWidth(_gradationShadowView.frame),
+                                                CGRectGetHeight(_gradationShadowView.frame));
         
-        //TODO: shadow height は barの高さを考えて決める
     }
     
     // Setup View Layer
@@ -280,21 +287,21 @@
     NNViewControllerContainer *toViewContainer = _viewContainers[_viewContainers.count - 2];
     NNViewControllerContainer *fromViewContainer = _visibleContainer;
     
-    [self _nPreparePopUpFromViewController:fromViewContainer toViewController:toViewContainer];
+    [self _preparePopUpFromViewController:fromViewContainer toViewController:toViewContainer];
     
     if (animated) {
-        [self _nStartPopTransition:^{
-            [self _nFinishPopupFromViewController:fromViewContainer toViewController:toViewContainer];
+        [self _startPopTransition:^{
+            [self _finishPopupFromViewController:fromViewContainer toViewController:toViewContainer];
         }];
     } else {
         toViewContainer.frame = _contentView.bounds;
         [_contentView addSubview:toViewContainer];
-        [self _nFinishPopupFromViewController:fromViewContainer toViewController:toViewContainer];
+        [self _finishPopupFromViewController:fromViewContainer toViewController:toViewContainer];
     }
 }
 
 
-- (void)_nStartPopTransition:(void(^)())completionBlock
+- (void)_startPopTransition:(void(^)())completionBlock
 {
     NNViewControllerContainer *toViewContainer = _viewContainers[_viewContainers.count - 2];
     NNViewControllerContainer *fromViewContainer = _visibleContainer;
@@ -326,7 +333,7 @@
     }];
 }
 
-- (void)_nCancelPopTransition:(void(^)())completionBlock
+- (void)_cancelPopTransition:(void(^)())completionBlock
 {
     NNViewControllerContainer *toViewContainer = _viewContainers[_viewContainers.count - 2];
     NNViewControllerContainer *fromViewContainer = _visibleContainer;
@@ -353,7 +360,6 @@
         
     } completion:^(BOOL finished) {
         [toViewContainer removeFromSuperviewAndParentViewController];
-        
         if (completionBlock)
             completionBlock();
     }];
@@ -376,7 +382,7 @@
     return NO;
 }
 
-- (void)_nPreparePopUpFromViewController:(NNViewControllerContainer *)fromViewContainer toViewController:(NNViewControllerContainer *)toViewContainer
+- (void)_preparePopUpFromViewController:(NNViewControllerContainer *)fromViewContainer toViewController:(NNViewControllerContainer *)toViewContainer
 {
     toViewContainer.parentViewController = self;
     toViewContainer.frame = CGRectMake(- (self.view.frame.size.width / 2.), 0, self.view.frame.size.width, self.view.frame.size.height);
@@ -384,10 +390,12 @@
     
     // shadow
     _coverShadowView.alpha = MaxShadowAlpha;
+    _coverShadowView.frame = [toViewContainer contentFrame];
+    
     _gradationShadowView.alpha = 1.;
     _gradationShadowView.frame = (CGRect){
         .origin.x = -CGRectGetWidth(_gradationShadowView.frame),
-        .origin.y = 0.,
+        .origin.y = CGRectGetMinY([toViewContainer contentFrame]),
         .size = _gradationShadowView.frame.size
     };
     
@@ -395,7 +403,7 @@
     [_contentView insertSubview:_gradationShadowView aboveSubview:_coverShadowView];
 }
 
-- (void)_nFinishPopupFromViewController:(NNViewControllerContainer *)fromViewContainer toViewController:(NNViewControllerContainer *)toViewContainer
+- (void)_finishPopupFromViewController:(NNViewControllerContainer *)fromViewContainer toViewController:(NNViewControllerContainer *)toViewContainer
 {
     [fromViewContainer removeFromSuperviewAndParentViewController];
     [_viewContainers removeLastObject];
@@ -424,7 +432,7 @@
     
     if (recognizer.state == UIGestureRecognizerStateBegan) {
         // setup next view controller
-        [self _nPreparePopUpFromViewController:fromViewContainer toViewController:toViewContainer];
+        [self _preparePopUpFromViewController:fromViewContainer toViewController:toViewContainer];
         
         fromViewContainer.frame = targetRect;
         CGRect nextTargetRect = CGRectOffset(toViewContainer.frame, moveX / 2., 0);
@@ -439,11 +447,11 @@
     } else {
         CGPoint point = [recognizer locationInView:self.view];
         if ((point.x > self.view.frame.size.width / 2 && [recognizer velocityInView:self.view].x > - 10) || [recognizer velocityInView:self.view].x > 300) {
-            [self _nStartPopTransition:^{
-                [self _nFinishPopupFromViewController:fromViewContainer toViewController:toViewContainer];
+            [self _startPopTransition:^{
+                [self _finishPopupFromViewController:fromViewContainer toViewController:toViewContainer];
             }];
         } else {
-            [self _nCancelPopTransition:nil];
+            [self _cancelPopTransition:nil];
         }
     }
     
