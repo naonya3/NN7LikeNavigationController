@@ -121,14 +121,10 @@
     PanHandlerView *_pangestureAreaView;
     
     //子ViewControllerを表示するコンテナ
-    UIView *_containerView;
-    
-    UIView *_visibleContainer;
-    NNViewControllerContainer *_nVisibleContainer;
-    
-    UIView *_processToViewContainer;
-    UIView *_processFromViewContainer;
-    
+    UIView *_contentView;
+
+    NNViewControllerContainer *_visibleContainer;
+
     UIView *_coverShadowView;
     UIView *_gradationShadowView;
 }
@@ -137,7 +133,7 @@
 {
     self = [super init];
     if (self) {
-        _nViewControllers = @[].mutableCopy;
+        _viewContainers = @[].mutableCopy;
         _topViewController = viewController;
     }
     return self;
@@ -163,8 +159,8 @@
         // navigation bar
         //_navigationBar = [[NN7LikeNavigationBar alloc] init];
         
-        _containerView = [[UIView alloc] initWithFrame:self.view.bounds];
-        _containerView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
+        _contentView = [[UIView alloc] initWithFrame:self.view.bounds];
+        _contentView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
     }
     
     // Shadow
@@ -179,7 +175,7 @@
     }
     
     // Layer
-    [self.view addSubview:_containerView];
+    [self.view addSubview:_contentView];
     [self.view addSubview:_pangestureAreaView];;
     [self pushViewController:_topViewController animated:NO];
 }
@@ -206,10 +202,10 @@
 
 - (void)pushViewController:(UIViewController *)toViewController animated:(BOOL)animated
 {
-    NNViewControllerContainer *toViewContainer = [[NNViewControllerContainer alloc] initWithFrame:_containerView.bounds];
+    NNViewControllerContainer *toViewContainer = [[NNViewControllerContainer alloc] initWithFrame:_contentView.bounds];
     [toViewContainer setViewController:toViewController parentViewController:self];
     
-    [_nViewControllers addObject:toViewContainer];
+    [_viewContainers addObject:toViewContainer];
     
     // Setup next ViewController
     {
@@ -230,24 +226,24 @@
     
     // Setup View Layer
     {
-        [_containerView addSubview:toViewContainer];
-        [_containerView insertSubview:_coverShadowView belowSubview:toViewContainer];
-        [_containerView insertSubview:_gradationShadowView aboveSubview:_coverShadowView];
+        [_contentView addSubview:toViewContainer];
+        [_contentView insertSubview:_coverShadowView belowSubview:toViewContainer];
+        [_contentView insertSubview:_gradationShadowView aboveSubview:_coverShadowView];
     }
     
     // Remove Function
     void (^removed)() = ^{
-        [_nVisibleContainer removeFromSuperview];
-        _nVisibleContainer = toViewContainer;
+        [_visibleContainer removeFromSuperview];
+        _visibleContainer = toViewContainer;
     };
     
     if (animated) {
         // set positions of start animating.
-        CGRect visibledViewTargetRect = [_nVisibleContainer frame];
-        visibledViewTargetRect.origin.x = -(_containerView.frame.size.width / 2.);
+        CGRect visibledViewTargetRect = [_visibleContainer frame];
+        visibledViewTargetRect.origin.x = -(_contentView.frame.size.width / 2.);
         
         CGRect pushedViewTargetRect = toViewContainer.frame;
-        pushedViewTargetRect.origin.x = _containerView.frame.size.width;
+        pushedViewTargetRect.origin.x = _contentView.frame.size.width;
         
         toViewContainer.frame = pushedViewTargetRect;
         pushedViewTargetRect.origin.x = 0;
@@ -258,7 +254,7 @@
         
         [UIView animateWithDuration:0.24 delay:0. options:UIViewAnimationOptionCurveEaseInOut animations:^{
             // View
-            _nVisibleContainer.frame = visibledViewTargetRect;
+            _visibleContainer.frame = visibledViewTargetRect;
             toViewContainer.frame = pushedViewTargetRect;
             
             // Shadow
@@ -277,8 +273,8 @@
 
 - (void)popViewControllerAnimated:(BOOL)animated
 {
-    NNViewControllerContainer *toViewContainer = _nViewControllers[_nViewControllers.count - 2];
-    NNViewControllerContainer *fromViewContainer = _nVisibleContainer;
+    NNViewControllerContainer *toViewContainer = _viewContainers[_viewContainers.count - 2];
+    NNViewControllerContainer *fromViewContainer = _visibleContainer;
     
     [self _nPreparePopUpFromViewController:fromViewContainer toViewController:toViewContainer];
     
@@ -287,8 +283,8 @@
             [self _nFinishPopupFromViewController:fromViewContainer toViewController:toViewContainer];
         }];
     } else {
-        toViewContainer.frame = _containerView.bounds;
-        [_containerView addSubview:toViewContainer];
+        toViewContainer.frame = _contentView.bounds;
+        [_contentView addSubview:toViewContainer];
         [self _nFinishPopupFromViewController:fromViewContainer toViewController:toViewContainer];
     }
 }
@@ -296,8 +292,8 @@
 
 - (void)_nStartPopTransition:(void(^)())completionBlock
 {
-    NNViewControllerContainer *toViewContainer = _nViewControllers[_nViewControllers.count - 2];
-    NNViewControllerContainer *fromViewContainer = _nVisibleContainer;
+    NNViewControllerContainer *toViewContainer = _viewContainers[_viewContainers.count - 2];
+    NNViewControllerContainer *fromViewContainer = _visibleContainer;
     
     CGRect rect = fromViewContainer.frame;
     rect.origin.x = self.view.frame.size.width;
@@ -308,7 +304,7 @@
     next.origin.y = 0;
     
     CGRect shadowRect = _gradationShadowView.frame;
-    shadowRect.origin.x = _containerView.frame.size.width - _gradationShadowView.frame.size.width;
+    shadowRect.origin.x = _contentView.frame.size.width - _gradationShadowView.frame.size.width;
     
     [UIView animateWithDuration:0.24 delay:0. options:UIViewAnimationOptionCurveEaseOut animations:^{
         fromViewContainer.frame = rect;
@@ -328,9 +324,8 @@
 
 - (void)_nCancelPopTransition:(void(^)())completionBlock
 {
-    NNViewControllerContainer *toViewContainer = _nViewControllers[_nViewControllers.count - 2];
-    NNViewControllerContainer *fromViewContainer = _nVisibleContainer;
-    
+    NNViewControllerContainer *toViewContainer = _viewContainers[_viewContainers.count - 2];
+    NNViewControllerContainer *fromViewContainer = _visibleContainer;
     
     CGRect rect = fromViewContainer.frame;
     rect.origin.x = 0;
@@ -376,7 +371,7 @@
 {
     toViewContainer.parentViewController = self;
     toViewContainer.frame = CGRectMake(- (self.view.frame.size.width / 2.), 0, self.view.frame.size.width, self.view.frame.size.height);
-    [_containerView insertSubview:toViewContainer belowSubview:fromViewContainer];
+    [_contentView insertSubview:toViewContainer belowSubview:fromViewContainer];
     
     // shadow
     _coverShadowView.alpha = MaxShadowAlpha;
@@ -387,25 +382,25 @@
         .size = _gradationShadowView.frame.size
     };
     
-    [_containerView insertSubview:_coverShadowView aboveSubview:toViewContainer];
-    [_containerView insertSubview:_gradationShadowView aboveSubview:_coverShadowView];
+    [_contentView insertSubview:_coverShadowView aboveSubview:toViewContainer];
+    [_contentView insertSubview:_gradationShadowView aboveSubview:_coverShadowView];
 }
 
 - (void)_nFinishPopupFromViewController:(NNViewControllerContainer *)fromViewContainer toViewController:(NNViewControllerContainer *)toViewContainer
 {
     [fromViewContainer removeFromSuperviewAndParentViewController];
-    [_nViewControllers removeLastObject];
-    _nVisibleContainer = toViewContainer;
+    [_viewContainers removeLastObject];
+    _visibleContainer = toViewContainer;
 }
 
 - (void)_panGestureHandler:(UIPanGestureRecognizer *)recognizer
 {
-    if (_nViewControllers.count <= 1) {
+    if (_viewContainers.count <= 1) {
         return;
     }
     
-    NNViewControllerContainer *toViewContainer = _nViewControllers[_nViewControllers.count - 2];
-    NNViewControllerContainer *fromViewContainer = _nVisibleContainer;
+    NNViewControllerContainer *toViewContainer = _viewContainers[_viewContainers.count - 2];
+    NNViewControllerContainer *fromViewContainer = _visibleContainer;
     
     float moveX = [recognizer translationInView:self.view].x;
     CGRect targetRect = CGRectOffset(fromViewContainer.frame, moveX, 0);
