@@ -436,6 +436,41 @@
     }];
 }
 
+
+- (void)_nCancelPopTransition:(void(^)())completionBlock
+{
+    NNViewControllerContainer *toViewContainer = _nViewControllers[_nViewControllers.count - 2];
+    NNViewControllerContainer *fromViewContainer = _nVisibleContainer;
+    
+    
+    CGRect rect = fromViewContainer.frame;
+    rect.origin.x = 0;
+    rect.origin.y = 0;
+    
+    CGRect next = toViewContainer.frame;
+    next.origin.x = - self.view.frame.size.width / 2.;
+    next.origin.y = 0;
+    
+    CGRect shadowRect = _gradationShadowView.frame;
+    shadowRect.origin.x = -_gradationShadowView.frame.size.width;
+    
+    [UIView animateWithDuration:0.24 delay:0. options:UIViewAnimationOptionCurveEaseOut animations:^{
+        fromViewContainer.frame = rect;
+        toViewContainer.frame = next;
+        
+        // shadow
+        _coverShadowView.alpha = MaxShadowAlpha;
+        _gradationShadowView.alpha = 1.;
+        _gradationShadowView.frame = shadowRect;
+        
+    } completion:^(BOOL finished) {
+        [toViewContainer removeFromSuperviewAndParentViewController];
+        
+        if (completionBlock)
+            completionBlock();
+    }];
+}
+
 #pragma mark - Gesture
 
 - (BOOL)gestureRecognizerShouldBegin:(UIGestureRecognizer *)gestureRecognizer
@@ -541,7 +576,7 @@
                 [self _nFinishPopupFromViewController:fromViewContainer toViewController:toViewContainer];
             }];
         } else {
-            [self _cancelPopTransition:nil];
+            [self _nCancelPopTransition:nil];
         }
     }
     
