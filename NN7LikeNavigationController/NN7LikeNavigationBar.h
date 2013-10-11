@@ -12,6 +12,11 @@
 
 @property (nonatomic, strong) UIView *contentView;
 @property (nonatomic, strong) UIView *backgroundView;
+@property (nonatomic, strong) UIView *leftContentView;
+@property (nonatomic, strong) UIView *rightContentView;
+@property (nonatomic, strong) UIView *titleView;
+@property (nonatomic, strong) UILabel *titleLabel;
+
 
 //- (void)pushNavigationContent:(UIView *)content animated:(BOOL)animated;
 //- (UIView *)popNavigationContentAnimated:(BOOL)animated;

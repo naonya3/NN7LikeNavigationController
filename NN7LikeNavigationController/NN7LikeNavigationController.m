@@ -79,7 +79,7 @@
         viewController.view.frame = (CGRect){
             .origin.x = 0,
             .origin.y = 0,
-            .size = viewController.view.frame.size
+            .size = self.bounds.size
         };
         viewController.view.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
         [self addSubview:viewController.view];
@@ -210,6 +210,7 @@
 {
     NNViewControllerContainer *toViewContainer = [[NNViewControllerContainer alloc] initWithFrame:_contentView.bounds];
     [toViewContainer setViewController:toViewController parentViewController:self];
+    toViewContainer.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
     
     [_viewContainers addObject:toViewContainer];
     
@@ -228,7 +229,6 @@
                                                 CGRectGetMinY([_visibleContainer contentFrame]),
                                                 CGRectGetWidth(_gradationShadowView.frame),
                                                 CGRectGetHeight(_gradationShadowView.frame));
-        
     }
     
     // Setup View Layer
