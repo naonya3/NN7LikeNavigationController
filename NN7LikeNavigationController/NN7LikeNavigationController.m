@@ -115,6 +115,8 @@
     UIView *_containerView;
     
     UIView *_visibleContainer;
+    NNViewControllerContainer *_nVisibleContainer;
+    
     UIView *_processToViewContainer;
     UIView *_processFromViewContainer;
     
@@ -126,7 +128,10 @@
 {
     self = [super init];
     if (self) {
+        // delete
         _viewControllers = @[].mutableCopy;
+        
+        _nViewControllers = @[].mutableCopy;
         _topViewController = viewController;
     }
     return self;
@@ -195,13 +200,14 @@
 
 - (void)pushViewController:(UIViewController *)toViewController animated:(BOOL)animated
 {
-    [_viewControllers addObject:toViewController];
+    [_nViewControllers addObject:toViewController];
     
-    UIView *toViewContainer;
+    NNViewControllerContainer *toViewContainer = [[NNViewControllerContainer alloc] initWithFrame:_containerView.bounds];
+    [toViewContainer setViewController:toViewController parentViewController:self];
+    
     // Setup next ViewController
     {
         [toViewController setNN7NavigationController:self];
-        toViewContainer = [self _createContainerFromViewController:toViewController];
     }
     
     // Prepare Shadow
@@ -225,10 +231,8 @@
     
     // Remove Function
     void (^removed)() = ^{
-        [_visibleViewController removeFromParentViewController];
-        [_visibleContainer removeFromSuperview];
-        _visibleViewController = toViewController;
-        _visibleContainer = toViewContainer;
+        [_nVisibleContainer removeFromSuperview];
+        _nVisibleContainer = toViewContainer;
     };
     
     if (animated) {
