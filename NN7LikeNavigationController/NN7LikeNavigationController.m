@@ -237,7 +237,7 @@
     
     if (animated) {
         // set positions of start animating.
-        CGRect visibledViewTargetRect = [_visibleContainer frame];
+        CGRect visibledViewTargetRect = [_nVisibleContainer frame];
         visibledViewTargetRect.origin.x = -(_containerView.frame.size.width / 2.);
         
         CGRect pushedViewTargetRect = toViewContainer.frame;
@@ -252,7 +252,7 @@
         
         [UIView animateWithDuration:0.24 delay:0. options:UIViewAnimationOptionCurveEaseInOut animations:^{
             // View
-            _visibleContainer.frame = visibledViewTargetRect;
+            _nVisibleContainer.frame = visibledViewTargetRect;
             toViewContainer.frame = pushedViewTargetRect;
             
             // Shadow
