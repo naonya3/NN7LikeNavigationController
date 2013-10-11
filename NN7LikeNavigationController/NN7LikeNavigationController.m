@@ -382,15 +382,6 @@
     CGRect shadowRect = _gradationShadowView.frame;
     shadowRect.origin.x = _containerView.frame.size.width - _gradationShadowView.frame.size.width;
     
-    
-    _coverShadowView.alpha = MaxShadowAlpha;
-    _gradationShadowView.alpha = 1.;
-    _gradationShadowView.frame = (CGRect){
-        .origin.x = -CGRectGetWidth(_gradationShadowView.frame),
-        .origin.y = 0.,
-        .size = _gradationShadowView.frame.size
-    };
-    
     [UIView animateWithDuration:0.24 delay:0. options:UIViewAnimationOptionCurveEaseOut animations:^{
         fromViewContainer.frame = rect;
         toViewContainer.frame = next;
@@ -481,9 +472,14 @@
     [_containerView insertSubview:toViewContainer belowSubview:fromViewContainer];
     
     // shadow
-    CGRect rect = _gradationShadowView.frame;
-    rect.origin.x = -_gradationShadowView.frame.size.width;
-    _gradationShadowView.frame = rect;
+    _coverShadowView.alpha = MaxShadowAlpha;
+    _gradationShadowView.alpha = 1.;
+    _gradationShadowView.frame = (CGRect){
+        .origin.x = -CGRectGetWidth(_gradationShadowView.frame),
+        .origin.y = 0.,
+        .size = _gradationShadowView.frame.size
+    };
+    
     [_containerView insertSubview:_coverShadowView aboveSubview:toViewContainer];
     [_containerView insertSubview:_gradationShadowView aboveSubview:_coverShadowView];
 }
@@ -506,16 +502,12 @@
 
 - (void)_panGestureHandler:(UIPanGestureRecognizer *)recognizer
 {
-    if (_viewControllers.count <= 1) {
+    if (_nViewControllers.count <= 1) {
         return;
     }
     
-    UIViewController *toViewController = _viewControllers[_viewControllers.count - 2];
-    UIViewController *fromViewController = _visibleViewController;
-    
-    
-    UIView *toViewContainer = _processToViewContainer;
-    UIView *fromViewContainer = _visibleContainer;
+    NNViewControllerContainer *toViewContainer = _nViewControllers[_nViewControllers.count - 2];
+    NNViewControllerContainer *fromViewContainer = _nVisibleContainer;
     
     float moveX = [recognizer translationInView:self.view].x;
     CGRect targetRect = CGRectOffset(fromViewContainer.frame, moveX, 0);
@@ -530,8 +522,7 @@
     
     if (recognizer.state == UIGestureRecognizerStateBegan) {
         // setup next view controller
-        [self _preparePopUpFromViewController:fromViewController toViewController:toViewController];
-        toViewContainer = _processToViewContainer;
+        [self _nPreparePopUpFromViewController:fromViewContainer toViewController:toViewContainer];
         
         fromViewContainer.frame = targetRect;
         CGRect nextTargetRect = CGRectOffset(toViewContainer.frame, moveX / 2., 0);
@@ -546,8 +537,8 @@
     } else {
         CGPoint point = [recognizer locationInView:self.view];
         if ((point.x > self.view.frame.size.width / 2 && [recognizer velocityInView:self.view].x > - 10) || [recognizer velocityInView:self.view].x > 300) {
-            [self _startPopTransition:^{
-                [self _finishPopupFromViewController:fromViewController toViewController:toViewController];
+            [self _nStartPopTransition:^{
+                [self _nFinishPopupFromViewController:fromViewContainer toViewController:toViewContainer];
             }];
         } else {
             [self _cancelPopTransition:nil];
