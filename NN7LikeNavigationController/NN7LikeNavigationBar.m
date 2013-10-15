@@ -8,6 +8,12 @@
 
 #import "NN7LikeNavigationBar.h"
 
+@interface NN7LikeNavigationBar ()
+
+@property (nonatomic, strong) UIButton *backButton;
+
+@end
+
 @implementation NN7LikeNavigationBar
 
 #define DEFAULT_IOS6_NAVIGATION_HEIGHT 44.f
@@ -42,20 +48,46 @@
 
 - (void)_initialize
 {
-    self.backgroundColor = [UIColor whiteColor];
+    self.backgroundColor = [UIColor clearColor];
+    
+    _backButtonHidden = NO;
+    
+    _backgroundView = [[UIView alloc] initWithFrame:self.bounds];
+    _backgroundView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
+    
     _contentView = [[UIView alloc] initWithFrame:self.bounds];
     _contentView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
+    
+    [self addSubview:_backgroundView];
     [self addSubview:_contentView];
+}
+
+- (UIButton *)createBackButtonWithPreviousNavigationBarTitle:(NSString *)title
+{
+    _backButton = [UIButton buttonWithType:UIButtonTypeRoundedRect];
+    [_backButton setTitle:@"" forState:UIControlStateNormal];
+    _backButton.frame = (CGRect){
+        100,
+        44,
+        10,
+        0
+    };
+    return _backButton;
+}
+
+- (void)setLeftContentView:(UIView *)leftContentView
+{
+    [_leftContentView removeFromSuperview];
+    
+    
+    _leftContentView = leftContentView;
+    leftContentView.frame = (CGRect){
+        .origin = {0, 0},
+        .size = leftContentView.frame.size
+    };
+    
+    [self.contentView addSubview:_leftContentView];
 }
 
 @end
 
-
-//@implementation NN7LikeNavigationBarItem
-
-//- (void)hoge
-//{
-//    NSLog(@"hoge");
-//}
-
-//@end
