@@ -18,7 +18,9 @@
 {
     self = [super initWithNibName:@"NN7LikeDemoViewController" bundle:nil];
     if (self) {
-        
+        NN7LikeNavigationBar *bar = [[NN7LikeNavigationBar alloc] init];
+        bar.backgroundView.backgroundColor = [UIColor whiteColor];
+        self.nn7NavigationBar = bar;
     }
     return self;
 }
@@ -71,9 +73,7 @@
 
 - (IBAction)backButtonTouchHandler:(id)sender
 {
-    if (self.nn7NavigationController.viewControllers.count > 1) {
-        [self.nn7NavigationController popViewControllerAnimated:YES];
-    }
+    [self.nn7NavigationController popViewControllerAnimated:YES];
 }
 
 - (IBAction)withBarButtonTouchHandler:(id)sender
