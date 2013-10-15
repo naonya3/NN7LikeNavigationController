@@ -65,12 +65,12 @@
 - (UIButton *)createBackButtonWithPreviousNavigationBarTitle:(NSString *)title
 {
     _backButton = [UIButton buttonWithType:UIButtonTypeRoundedRect];
-    [_backButton setTitle:@"" forState:UIControlStateNormal];
+    [_backButton setTitle:title forState:UIControlStateNormal];
     _backButton.frame = (CGRect){
-        100,
-        44,
         10,
-        0
+        0,
+        88,
+        44
     };
     return _backButton;
 }
