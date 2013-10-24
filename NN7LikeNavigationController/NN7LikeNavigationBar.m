@@ -11,6 +11,7 @@
 @interface NN7LikeNavigationBar ()
 
 @property (nonatomic, strong) UIButton *backButton;
+@property (nonatomic, strong) UILabel *titleLabel;
 
 @end
 
@@ -54,10 +55,12 @@
     
     _backgroundView = [[UIView alloc] initWithFrame:self.bounds];
     _backgroundView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
-    _backgroundView.backgroundColor = [UIColor colorWithRed:254.f / 256.f green:254.f / 256.f blue:254.f / 256.f alpha:1.f];
+    _backgroundView.backgroundColor = [UIColor colorWithRed:254.f / 255.f green:254.f / 255.f blue:254.f / 255.f alpha:1.f];
     
     _contentView = [[UIView alloc] initWithFrame:self.bounds];
     _contentView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
+    
+    _tintColor = [UIColor colorWithRed:0.f green:122.f / 255.f blue:255.f / 255.f alpha:1.f];
     
     [self addSubview:_backgroundView];
     [self addSubview:_contentView];
@@ -76,18 +79,67 @@
     return _backButton;
 }
 
+- (void)layoutSubviews
+{
+    [super layoutSubviews];
+    
+    _leftContentView.frame = (CGRect){
+        .origin.x = 0.f,
+        .origin.y = CGRectGetHeight(self.frame) - CGRectGetHeight(_leftContentView.frame),
+        .size = _leftContentView.frame.size
+    };
+    
+    _rightContentView.frame = (CGRect){
+        .origin.x = CGRectGetWidth(self.frame) - CGRectGetWidth(_rightContentView.frame),
+        .origin.y = CGRectGetHeight(self.frame) - CGRectGetHeight(_rightContentView.frame),
+        .size = _rightContentView.frame.size
+    };
+    
+    float titleMaxWidth = CGRectGetWidth(self.frame) - CGRectGetWidth(_rightContentView.frame) - CGRectGetWidth(_leftContentView.frame);
+    CGSize titleSize = [_titleLabel.text sizeWithFont:_titleLabel.font constrainedToSize:CGSizeMake(titleMaxWidth, CGFLOAT_MAX) lineBreakMode:_titleLabel.lineBreakMode];
+    _titleLabel.frame = (CGRect){
+        .origin.x = MAX(CGRectGetMaxX(_leftContentView.frame),CGRectGetWidth(self.frame) / 2.f - titleSize.width / 2.f),
+        .origin.y = CGRectGetHeight(self.frame) - CGRectGetHeight(_titleLabel.frame),
+        .size.width = titleSize.width,
+        .size.height = CGRectGetHeight(_titleLabel.frame)
+    };
+}
+
+- (UILabel *)createTitleLabel
+{
+    UILabel *label = [[UILabel alloc] initWithFrame:CGRectMake(0, 0, 100, 44)];
+    label.font = [UIFont boldSystemFontOfSize:18.f];
+    label.backgroundColor = [UIColor clearColor];
+    label.numberOfLines = 1;
+    label.textAlignment = UITextAlignmentCenter;
+    label.textColor = [UIColor blackColor];
+    return label;
+}
+
+- (void)setTitle:(NSString *)title
+{
+    _title = title;
+    [_titleLabel removeFromSuperview];
+    _titleLabel = [self createTitleLabel];
+    _titleLabel.text = title;
+    [self.contentView addSubview:_titleLabel];
+    [self layoutSubviews];
+}
+
 - (void)setLeftContentView:(UIView *)leftContentView
 {
     [_leftContentView removeFromSuperview];
-    
     _leftContentView = leftContentView;
-    leftContentView.frame = (CGRect){
-        .origin = {0, 0},
-        .size = leftContentView.frame.size
-    };
-    
     [self.contentView addSubview:_leftContentView];
+    [self layoutSubviews];
+}
+
+- (void)setRightContentView:(UIView *)rightContentView
+{
+    [_rightContentView removeFromSuperview];
+    _rightContentView = rightContentView;
+    [self.contentView addSubview:_rightContentView];
+    [self layoutSubviews];
 }
 
 @end
-

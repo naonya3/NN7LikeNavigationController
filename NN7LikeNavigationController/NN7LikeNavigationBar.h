@@ -14,9 +14,11 @@
 @property (nonatomic, strong, readonly) UIView *backgroundView;
 @property (nonatomic, strong) UIView *leftContentView;
 @property (nonatomic, strong) UIView *rightContentView;
+@property (nonatomic, strong) UIColor *tintColor;
 //@property (nonatomic, strong) UIButton *backButton;
-@property (nonatomic, strong) UIView *titleView;
-@property (nonatomic, strong) UILabel *titleLabel;
+//@property (nonatomic, strong) UIView *titleView;
+//@property (nonatomic, strong) UILabel *titleLabel;
+@property (nonatomic, copy) NSString *title;
 
 // default NO
 @property (nonatomic) BOOL backButtonHidden;

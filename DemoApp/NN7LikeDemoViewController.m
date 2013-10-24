@@ -19,7 +19,7 @@
     self = [super initWithNibName:@"NN7LikeDemoViewController" bundle:nil];
     if (self) {
         NN7LikeNavigationBar *bar = [[NN7LikeNavigationBar alloc] init];
-        bar.backgroundView.backgroundColor = [UIColor whiteColor];
+        bar.title = @"Page Title";
         self.nn7NavigationBar = bar;
     }
     return self;
