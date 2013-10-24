@@ -10,7 +10,7 @@
 
 #import <objc/runtime.h>
 
-#define PanAreaSize 30.
+#define PanAreaSize 20.
 #define MaxShadowAlpha .30
 
 @interface PanHandlerView : UIView
@@ -18,6 +18,9 @@
 @end
 
 @interface NNViewControllerContainer : UIView
+{
+    BOOL _isAnimating;
+}
 
 @property (nonatomic, strong, readonly) UIViewController *viewController;
 @property (nonatomic, strong) UIViewController *parentViewController;
@@ -98,7 +101,7 @@
 
 - (UIView *)hitTest:(CGPoint)point withEvent:(UIEvent *)event
 {
-    if (point.x <= PanAreaSize) {
+    if (point.x <= PanAreaSize && CGRectContainsPoint(self.frame, point)) {
         return self;
     }
     return nil;
@@ -112,7 +115,7 @@
 
 @interface NN7LikeNavigationController () <UIGestureRecognizerDelegate>
 {
-    
+    BOOL _isAnimation;
 }
 
 - (void)_panGestureHandler:(UIPanGestureRecognizer *)recognizer;
@@ -155,6 +158,7 @@
         _pangestureAreaView = [[PanHandlerView alloc] initWithFrame:self.view.bounds];
         _pangestureAreaView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
         _pangestureAreaView.backgroundColor = [UIColor clearColor];
+        _pangestureAreaView.clipsToBounds = YES;
         
         _panGestureRecognizer = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(_panGestureHandler:)];
         [_pangestureAreaView addGestureRecognizer:_panGestureRecognizer];
@@ -209,6 +213,9 @@
 
 - (void)pushViewController:(UIViewController *)toViewController animated:(BOOL)animated
 {
+    if (_isAnimation)
+        return;
+    
     NNViewControllerContainer *toViewContainer = [[NNViewControllerContainer alloc] initWithFrame:_contentView.bounds];
     [toViewContainer setViewController:toViewController parentViewController:self];
     toViewContainer.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
@@ -241,6 +248,11 @@
                                                 CGRectGetHeight(_gradationShadowView.frame));
     }
     
+    // Prepare Panarea
+    {
+        _pangestureAreaView.frame = [toViewContainer contentFrame];
+    }
+
     // Setup View Layer
     {
         [_contentView addSubview:toViewContainer];
@@ -255,6 +267,7 @@
     };
     
     if (animated) {
+        _isAnimation = YES;
         // set positions of start animating.
         CGRect visibledViewTargetRect = [_visibleContainer frame];
         visibledViewTargetRect.origin.x = -(_contentView.frame.size.width / 2.);
@@ -286,6 +299,7 @@
             toViewContainer.viewController.nn7NavigationBar.contentView.alpha = 1.;
             
         } completion:^(BOOL finished) {
+            _isAnimation = NO;
             removed();
         }];
     } else {
@@ -296,7 +310,7 @@
 
 - (void)popViewControllerAnimated:(BOOL)animated
 {
-    if (_viewContainers.count <= 1) {
+    if (_viewContainers.count <= 1 || _isAnimation) {
         return;
     }
     
@@ -306,8 +320,10 @@
     [self _preparePopUpFromViewController:fromViewContainer toViewController:toViewContainer];
     
     if (animated) {
+        _isAnimation = YES;
         [self _startPopTransition:^{
             [self _finishPopupFromViewController:fromViewContainer toViewController:toViewContainer];
+            _isAnimation = NO;
         }];
     } else {
         toViewContainer.frame = _contentView.bounds;
@@ -368,6 +384,9 @@
     CGRect shadowRect = _gradationShadowView.frame;
     shadowRect.origin.x = -_gradationShadowView.frame.size.width;
     
+    _pangestureAreaView.frame = [fromViewContainer contentFrame];
+    
+    
     [UIView animateWithDuration:0.24 delay:0. options:UIViewAnimationOptionCurveEaseOut animations:^{
         fromViewContainer.frame = rect;
         toViewContainer.frame = next;
@@ -381,6 +400,9 @@
         fromViewContainer.viewController.nn7NavigationBar.contentView.alpha = 1.0;
         
     } completion:^(BOOL finished) {
+        toViewContainer.userInteractionEnabled = YES;
+        fromViewContainer.userInteractionEnabled = YES;
+        
         [toViewContainer removeFromSuperviewAndParentViewController];
         if (completionBlock)
             completionBlock();
@@ -398,7 +420,7 @@
 {
     //上でhitTestしてるからいらないかも
     CGPoint point = [gestureRecognizer locationInView:self.view];
-    if (point.x <= PanAreaSize) {
+    if (point.x <= PanAreaSize && !_isAnimation) {
         return YES;
     }
     return NO;
@@ -406,6 +428,9 @@
 
 - (void)_preparePopUpFromViewController:(NNViewControllerContainer *)fromViewContainer toViewController:(NNViewControllerContainer *)toViewContainer
 {
+    toViewContainer.userInteractionEnabled = NO;
+    fromViewContainer.userInteractionEnabled = NO;
+    
     toViewContainer.parentViewController = self;
     toViewContainer.frame = CGRectMake(- (self.view.frame.size.width / 2.), 0, self.view.frame.size.width, self.view.frame.size.height);
     [_contentView insertSubview:toViewContainer belowSubview:fromViewContainer];
@@ -421,6 +446,8 @@
         .size = _gradationShadowView.frame.size
     };
     
+    _pangestureAreaView.frame = [toViewContainer contentFrame];
+    
     toViewContainer.viewController.nn7NavigationBar.contentView.alpha = 0.;
     
     [_contentView insertSubview:_coverShadowView aboveSubview:toViewContainer];
@@ -429,6 +456,9 @@
 
 - (void)_finishPopupFromViewController:(NNViewControllerContainer *)fromViewContainer toViewController:(NNViewControllerContainer *)toViewContainer
 {
+    toViewContainer.userInteractionEnabled = YES;
+    fromViewContainer.userInteractionEnabled = YES;
+    
     [fromViewContainer removeFromSuperviewAndParentViewController];
     [_viewContainers removeLastObject];
     _visibleContainer = toViewContainer;
@@ -474,11 +504,16 @@
     } else {
         CGPoint point = [recognizer locationInView:self.view];
         if ((point.x > self.view.frame.size.width / 2 && [recognizer velocityInView:self.view].x > - 10) || [recognizer velocityInView:self.view].x > 300) {
+            _isAnimation = YES;
             [self _startPopTransition:^{
                 [self _finishPopupFromViewController:fromViewContainer toViewController:toViewContainer];
+                _isAnimation = NO;
             }];
         } else {
-            [self _cancelPopTransition:nil];
+            _isAnimation = YES;
+            [self _cancelPopTransition:^{
+                _isAnimation = NO;
+            }];
         }
     }
     

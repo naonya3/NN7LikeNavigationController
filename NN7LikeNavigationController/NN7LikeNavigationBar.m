@@ -54,6 +54,7 @@
     
     _backgroundView = [[UIView alloc] initWithFrame:self.bounds];
     _backgroundView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
+    _backgroundView.backgroundColor = [UIColor colorWithRed:254.f / 256.f green:254.f / 256.f blue:254.f / 256.f alpha:1.f];
     
     _contentView = [[UIView alloc] initWithFrame:self.bounds];
     _contentView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
@@ -78,7 +79,6 @@
 - (void)setLeftContentView:(UIView *)leftContentView
 {
     [_leftContentView removeFromSuperview];
-    
     
     _leftContentView = leftContentView;
     leftContentView.frame = (CGRect){
