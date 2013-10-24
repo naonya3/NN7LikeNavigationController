@@ -22,6 +22,7 @@
 @property (nonatomic) BOOL backButtonHidden;
 
 - (UIButton *)createBackButtonWithPreviousNavigationBarTitle:(NSString *)title;
+- (UILabel *)createTitleLabel;
 
 //- (void)pushNavigationContent:(UIView *)content animated:(BOOL)animated;
 //- (UIView *)popNavigationContentAnimated:(BOOL)animated;
