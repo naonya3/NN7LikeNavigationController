@@ -10,7 +10,7 @@
 
 #import <objc/runtime.h>
 
-#define PanAreaSize 30.
+#define PanAreaSize 20.
 #define MaxShadowAlpha .30
 
 @interface PanHandlerView : UIView
@@ -98,7 +98,7 @@
 
 - (UIView *)hitTest:(CGPoint)point withEvent:(UIEvent *)event
 {
-    if (point.x <= PanAreaSize) {
+    if (point.x <= PanAreaSize && CGRectContainsPoint(self.frame, point)) {
         return self;
     }
     return nil;
@@ -155,6 +155,7 @@
         _pangestureAreaView = [[PanHandlerView alloc] initWithFrame:self.view.bounds];
         _pangestureAreaView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
         _pangestureAreaView.backgroundColor = [UIColor clearColor];
+        _pangestureAreaView.clipsToBounds = YES;
         
         _panGestureRecognizer = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(_panGestureHandler:)];
         [_pangestureAreaView addGestureRecognizer:_panGestureRecognizer];
@@ -241,6 +242,11 @@
                                                 CGRectGetHeight(_gradationShadowView.frame));
     }
     
+    // Prepare Panarea
+    {
+        _pangestureAreaView.frame = [toViewContainer contentFrame];
+    }
+
     // Setup View Layer
     {
         [_contentView addSubview:toViewContainer];
@@ -368,6 +374,9 @@
     CGRect shadowRect = _gradationShadowView.frame;
     shadowRect.origin.x = -_gradationShadowView.frame.size.width;
     
+    _pangestureAreaView.frame = [fromViewContainer contentFrame];
+    
+    
     [UIView animateWithDuration:0.24 delay:0. options:UIViewAnimationOptionCurveEaseOut animations:^{
         fromViewContainer.frame = rect;
         toViewContainer.frame = next;
@@ -420,6 +429,8 @@
         .origin.y = CGRectGetMinY([toViewContainer contentFrame]),
         .size = _gradationShadowView.frame.size
     };
+    
+    _pangestureAreaView.frame = [toViewContainer contentFrame];
     
     toViewContainer.viewController.nn7NavigationBar.contentView.alpha = 0.;
     
