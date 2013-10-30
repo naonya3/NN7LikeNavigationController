@@ -76,9 +76,9 @@
             .size.height = CGRectGetHeight(self.frame) - CGRectGetHeight(navigationbar.frame)
         };
         viewController.view.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
-        
-        [self addSubview:navigationbar];
         [self addSubview:viewController.view];
+        [self addSubview:navigationbar];
+        
     } else {
         viewController.view.frame = (CGRect){
             .origin.x = 0,
