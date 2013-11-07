@@ -223,7 +223,7 @@
     [_viewContainers addObject:toViewContainer];
     
     // TODO: ここ移動させたい
-    if (!toViewContainer.viewController.nn7NavigationBar.backButtonHidden) {
+    if (!toViewContainer.viewController.nn7NavigationBar.backButtonHidden && _viewContainers.count > 1) {
         UIButton *backButton = [toViewContainer.viewController.nn7NavigationBar createBackButtonWithPreviousNavigationBarTitle:@"タイトルが入ります"];
         [backButton addTarget:self action:@selector(popViewControllerAnimated:) forControlEvents:UIControlEventTouchUpInside];
         UIView *view = [[UIView alloc] initWithFrame:CGRectMake(0, 0, CGRectGetMaxX(backButton.frame), CGRectGetMaxY(backButton.frame))];
