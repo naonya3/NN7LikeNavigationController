@@ -321,8 +321,9 @@
     
     if (animated) {
         _isAnimation = YES;
+        __weak __block typeof (self) weakSelf = self;
         [self _startPopTransition:^{
-            [self _finishPopupFromViewController:fromViewContainer toViewController:toViewContainer];
+            [weakSelf _finishPopupFromViewController:fromViewContainer toViewController:toViewContainer];
             _isAnimation = NO;
         }];
     } else {
@@ -505,8 +506,9 @@
         CGPoint point = [recognizer locationInView:self.view];
         if ((point.x > self.view.frame.size.width / 2 && [recognizer velocityInView:self.view].x > - 10) || [recognizer velocityInView:self.view].x > 300) {
             _isAnimation = YES;
+            __weak __block typeof (self) weakSelf = self;
             [self _startPopTransition:^{
-                [self _finishPopupFromViewController:fromViewContainer toViewController:toViewContainer];
+                [weakSelf _finishPopupFromViewController:fromViewContainer toViewController:toViewContainer];
                 _isAnimation = NO;
             }];
         } else {
