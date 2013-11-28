@@ -86,6 +86,18 @@
     [self.nn7NavigationController pushViewController:[[NN7LikeDemoViewController alloc] initWithoutBar] animated:YES];
 }
 
+- (IBAction)presentViewButtonTouchHandler:(id)sender
+{
+    NN7LikeDemoViewController *viewController = [[NN7LikeDemoViewController alloc] initWithBar];
+    NN7LikeNavigationController *navigationController = [[NN7LikeNavigationController alloc] initWithRootViewController:viewController];
+    [self presentModalViewController:navigationController animated:YES];
+}
+
+- (IBAction)dismissPresentedViewButtonTouchHandler:(id)sender
+{
+    [self dismissViewControllerAnimated:YES completion:nil];
+}
+
 - (void)dealloc
 {
     NSLog(@"dealloc");

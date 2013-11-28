@@ -23,7 +23,7 @@
 }
 
 @property (nonatomic, strong, readonly) UIViewController *viewController;
-@property (nonatomic, strong) UIViewController *parentViewController;
+@property (nonatomic, weak) UIViewController *parentViewController;
 
 - (id)initWithViewController:(UIViewController *)viewController parentViewController:(UIViewController *)parentViewController;
 - (void)setViewController:(UIViewController *)viewController parentViewController:(UIViewController *)parentViewController;
@@ -225,7 +225,7 @@
     // TODO: ここ移動させたい
     if (!toViewContainer.viewController.nn7NavigationBar.backButtonHidden && _viewContainers.count > 1) {
         UIButton *backButton = [toViewContainer.viewController.nn7NavigationBar createBackButtonWithPreviousNavigationBarTitle:@"タイトルが入ります"];
-        [backButton addTarget:self action:@selector(popViewControllerAnimated:) forControlEvents:UIControlEventTouchUpInside];
+        [backButton addTarget:self action:@selector(_didTouchBackButton:) forControlEvents:UIControlEventTouchUpInside];
         UIView *view = [[UIView alloc] initWithFrame:CGRectMake(0, 0, CGRectGetMaxX(backButton.frame), CGRectGetMaxY(backButton.frame))];
         [view addSubview:backButton];
         toViewContainer.viewController.nn7NavigationBar.leftContentView = view;
@@ -306,6 +306,11 @@
         // remove
         removed();
     }
+}
+
+- (void)_didTouchBackButton:(id)sender
+{
+    [self popViewControllerAnimated:YES];
 }
 
 - (void)popViewControllerAnimated:(BOOL)animated
@@ -486,7 +491,7 @@
     _gradationShadowView.alpha = 1. - fromViewContainer.frame.origin.x / self.view.frame.size.width;
     
     toViewContainer.viewController.nn7NavigationBar.contentView.alpha = fromViewContainer.frame.origin.x / self.view.frame.size.width;
-    fromViewContainer.viewController.nn7NavigationBar.contentView.alpha = 1. - fromViewContainer.frame.origin.x / self.view.frame.size.width;
+    fromViewContainer.viewController.nn7NavigationBar.contentView.alpha = 1. - fromViewContainer.frame.origin.x / (self.view.frame.size.width * 0.7);
     
     if (recognizer.state == UIGestureRecognizerStateBegan) {
         // setup next view controller
@@ -565,7 +570,7 @@
 
 - (void)setNN7NavigationController:(NN7LikeNavigationController *)nn7NavigationController
 {
-    objc_setAssociatedObject(self, _cmd, nn7NavigationController, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    objc_setAssociatedObject(self, _cmd, nn7NavigationController, OBJC_ASSOCIATION_ASSIGN);
 }
 
 @end
