@@ -103,6 +103,13 @@
         .size.width = titleSize.width,
         .size.height = CGRectGetHeight(_titleLabel.frame)
     };
+    
+    _titleLabel.hidden = !_titleView;
+    _titleView.frame = (CGRect){
+        .origin.x = MAX(CGRectGetMaxX(_leftContentView.frame),CGRectGetWidth(self.frame) / 2.f - _titleView.frame.size.width / 2.f),
+        .origin.y = CGRectGetHeight(self.frame) - CGRectGetHeight(_titleView.frame),
+        .size = _titleView.frame.size
+    };
 }
 
 - (UILabel *)createTitleLabel
@@ -123,6 +130,16 @@
     _titleLabel = [self createTitleLabel];
     _titleLabel.text = title;
     [self.contentView addSubview:_titleLabel];
+    [self layoutSubviews];
+}
+
+- (void)setTitleView:(UIView *)titleView
+{
+    [_titleView removeFromSuperview];
+    _titleView = titleView;
+    if (_titleView) {
+        [self.contentView addSubview:_titleView];
+    }
     [self layoutSubviews];
 }
 
