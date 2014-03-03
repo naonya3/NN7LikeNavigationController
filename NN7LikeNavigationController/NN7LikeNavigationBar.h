@@ -16,7 +16,7 @@
 @property (nonatomic, strong) UIView *rightContentView;
 @property (nonatomic, strong) UIColor *tintColor;
 //@property (nonatomic, strong) UIButton *backButton;
-//@property (nonatomic, strong) UIView *titleView;
+@property (nonatomic, strong) UIView *titleView;
 //@property (nonatomic, strong) UILabel *titleLabel;
 @property (nonatomic, copy) NSString *title;
 
