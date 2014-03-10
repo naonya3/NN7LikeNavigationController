@@ -104,7 +104,7 @@
         .size.height = CGRectGetHeight(_titleLabel.frame)
     };
     
-    _titleLabel.hidden = !_titleView;
+    _titleLabel.hidden = (_titleView != nil);
     _titleView.frame = (CGRect){
         .origin.x = MAX(CGRectGetMaxX(_leftContentView.frame),CGRectGetWidth(self.frame) / 2.f - _titleView.frame.size.width / 2.f),
         .origin.y = CGRectGetHeight(self.frame) - CGRectGetHeight(_titleView.frame),
