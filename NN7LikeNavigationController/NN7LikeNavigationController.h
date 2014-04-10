@@ -12,7 +12,7 @@
 
 @interface NN7LikeNavigationController : UIViewController
 
-//@property (nonatomic, copy) NSMutableArray *viewContainers;
+@property (nonatomic, readonly) NSArray *viewControllers;
 @property (nonatomic, strong, readonly) UIViewController *topViewController;
 @property (nonatomic, strong, readonly) UIViewController *visibleViewContorller;
 

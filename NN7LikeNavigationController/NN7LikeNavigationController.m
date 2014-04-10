@@ -420,6 +420,15 @@
     return _visibleContainer.viewController;
 }
 
+- (NSArray *)viewControllers
+{
+    NSMutableArray *arr = @[].mutableCopy;
+    for (NNViewControllerContainer *c in _viewContainers) {
+        [arr addObject:c.viewController];
+    }
+    return arr.copy;
+}
+
 #pragma mark - Gesture
 
 - (BOOL)gestureRecognizerShouldBegin:(UIGestureRecognizer *)gestureRecognizer
