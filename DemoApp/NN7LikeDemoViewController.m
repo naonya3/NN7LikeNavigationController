@@ -71,6 +71,20 @@
     [super didReceiveMemoryWarning];
 }
 
+- (void)didMoveToParentViewController:(UIViewController *)parent
+{
+    [super didMoveToParentViewController:parent];
+    if (parent) {
+        NSLog(@"%d", self.nn7NavigationController.viewControllers.count);
+    }
+}
+
+- (void)willMoveToParentViewController:(UIViewController *)parent
+{
+    [super willMoveToParentViewController:parent];
+}
+
+
 - (IBAction)backButtonTouchHandler:(id)sender
 {
     [self.nn7NavigationController popViewControllerAnimated:YES];
@@ -100,7 +114,7 @@
 
 - (void)dealloc
 {
-    NSLog(@"dealloc");
+
 }
 
 @end

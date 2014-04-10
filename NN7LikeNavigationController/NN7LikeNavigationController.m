@@ -220,10 +220,10 @@
     [toViewContainer setViewController:toViewController parentViewController:self];
     toViewContainer.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
     
-    [_viewContainers addObject:toViewContainer];
+    
     
     // TODO: ここ移動させたい
-    if (!toViewContainer.viewController.nn7NavigationBar.backButtonHidden && _viewContainers.count > 1) {
+    if (!toViewContainer.viewController.nn7NavigationBar.backButtonHidden && _viewContainers.count > 0) {
         UIButton *backButton = [toViewContainer.viewController.nn7NavigationBar createBackButtonWithPreviousNavigationBarTitle:@"タイトルが入ります"];
         [backButton addTarget:self action:@selector(_didTouchBackButton:) forControlEvents:UIControlEventTouchUpInside];
         UIView *view = [[UIView alloc] initWithFrame:CGRectMake(0, 0, CGRectGetMaxX(backButton.frame), CGRectGetMaxY(backButton.frame))];
@@ -261,11 +261,14 @@
     }
     
     // Remove Function
+    __weak __block typeof (self) weakSelf = self;
     void (^removed)() = ^{
-        [_visibleContainer removeFromSuperview];
+        [_viewContainers addObject:toViewContainer];
+        [_visibleContainer removeFromSuperviewAndParentViewController];
         _visibleContainer = toViewContainer;
+        [toViewContainer.viewController didMoveToParentViewController:weakSelf];
     };
-    
+    [_visibleContainer.viewController willMoveToParentViewController:nil];
     if (animated) {
         _isAnimation = YES;
         // set positions of start animating.
@@ -446,6 +449,7 @@
     toViewContainer.userInteractionEnabled = NO;
     fromViewContainer.userInteractionEnabled = NO;
     
+    [fromViewContainer.viewController willMoveToParentViewController:nil];
     toViewContainer.parentViewController = self;
     toViewContainer.frame = CGRectMake(- (self.view.frame.size.width / 2.), 0, self.view.frame.size.width, self.view.frame.size.height);
     [_contentView insertSubview:toViewContainer belowSubview:fromViewContainer];
@@ -473,10 +477,10 @@
 {
     toViewContainer.userInteractionEnabled = YES;
     fromViewContainer.userInteractionEnabled = YES;
-    
     [fromViewContainer removeFromSuperviewAndParentViewController];
     [_viewContainers removeLastObject];
     _visibleContainer = toViewContainer;
+    [_visibleContainer.viewController didMoveToParentViewController:self];
 }
 
 - (void)_panGestureHandler:(UIPanGestureRecognizer *)recognizer
