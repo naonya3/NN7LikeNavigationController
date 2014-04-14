@@ -100,9 +100,9 @@
     float mixX = CGRectGetWidth(self.frame) / 2.f - titleSize.width / 2.f;
     float maxX = CGRectGetWidth(self.frame) / 2.f + titleSize.width / 2.f;
     float finalTitleX;
-    if (mixX >= CGRectGetMaxX(_leftContentView.frame) && maxX <= CGRectGetMinX(_rightContentView.frame)) {
+    if (mixX >= CGRectGetMaxX(_leftContentView.frame) && maxX <= ((_rightContentView)?CGRectGetMinX(_rightContentView.frame):CGRectGetWidth(self.frame))) {
         finalTitleX = CGRectGetWidth(self.frame) / 2.f - titleSize.width / 2.f;
-    } else if (mixX >= CGRectGetMaxX(_leftContentView.frame) && maxX > CGRectGetMinX(_rightContentView.frame)) {
+    } else if (mixX >= CGRectGetMaxX(_leftContentView.frame) && maxX > ((_rightContentView)?CGRectGetMinX(_rightContentView.frame):CGRectGetWidth(self.frame))) {
         finalTitleX = CGRectGetMinX(_rightContentView.frame) - titleSize.width;
     } else {
         finalTitleX = CGRectGetMaxX(_leftContentView.frame);
