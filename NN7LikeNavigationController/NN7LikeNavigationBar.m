@@ -97,6 +97,9 @@
     
     float titleMaxWidth = CGRectGetWidth(self.frame) - CGRectGetWidth(_rightContentView.frame) - CGRectGetWidth(_leftContentView.frame);
     CGSize titleSize = [_titleLabel.text sizeWithFont:_titleLabel.font constrainedToSize:CGSizeMake(titleMaxWidth, CGFLOAT_MAX) lineBreakMode:_titleLabel.lineBreakMode];
+    if (_titleView) {
+        titleSize = _titleView.frame.size;
+    }
     float mixX = CGRectGetWidth(self.frame) / 2.f - titleSize.width / 2.f;
     float maxX = CGRectGetWidth(self.frame) / 2.f + titleSize.width / 2.f;
     float finalTitleX;
@@ -117,7 +120,7 @@
     
     _titleLabel.hidden = (_titleView != nil);
     _titleView.frame = (CGRect){
-        .origin.x = MAX(CGRectGetMaxX(_leftContentView.frame),CGRectGetWidth(self.frame) / 2.f - _titleView.frame.size.width / 2.f),
+        .origin.x = finalTitleX,
         .origin.y = CGRectGetHeight(self.frame) - CGRectGetHeight(_titleView.frame),
         .size.width = MIN(titleMaxWidth, _titleView.frame.size.width),
         .size.height = _titleView.frame.size.height
