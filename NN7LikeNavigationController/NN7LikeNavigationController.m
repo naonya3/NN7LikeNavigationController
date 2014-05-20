@@ -220,8 +220,6 @@
     [toViewContainer setViewController:toViewController parentViewController:self];
     toViewContainer.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
     
-    
-    
     // TODO: ここ移動させたい
     if (!toViewContainer.viewController.nn7NavigationBar.backButtonHidden && _viewContainers.count > 0) {
         UIButton *backButton = [toViewContainer.viewController.nn7NavigationBar createBackButtonWithPreviousNavigationBarTitle:@"タイトルが入ります"];
@@ -316,13 +314,18 @@
     [self popViewControllerAnimated:YES];
 }
 
-- (void)popViewControllerAnimated:(BOOL)animated
+- (void)popToRootViewControllerAnimated:(BOOL)animated
+{
+    [self _popToViewControllerAtIndex:0 animated:animated];
+}
+
+- (void)_popToViewControllerAtIndex:(NSInteger)index animated:(BOOL)animated
 {
     if (_viewContainers.count <= 1 || _isAnimation) {
         return;
     }
     
-    NNViewControllerContainer *toViewContainer = _viewContainers[_viewContainers.count - 2];
+    NNViewControllerContainer *toViewContainer = _viewContainers[index];
     NNViewControllerContainer *fromViewContainer = _visibleContainer;
     
     [self _preparePopUpFromViewController:fromViewContainer toViewController:toViewContainer];
@@ -330,7 +333,7 @@
     if (animated) {
         _isAnimation = YES;
         __weak __block typeof (self) weakSelf = self;
-        [self _startPopTransition:^{
+        [self _startPopTransitionToIndex:index completionBlock:^{
             [weakSelf _finishPopupFromViewController:fromViewContainer toViewController:toViewContainer];
             _isAnimation = NO;
         }];
@@ -341,10 +344,15 @@
     }
 }
 
-
-- (void)_startPopTransition:(void(^)())completionBlock
+- (void)popViewControllerAnimated:(BOOL)animated
 {
-    NNViewControllerContainer *toViewContainer = _viewContainers[_viewContainers.count - 2];
+    [self _popToViewControllerAtIndex:_viewContainers.count-2 animated:YES];
+}
+
+
+- (void)_startPopTransitionToIndex:(NSInteger)index completionBlock:(void(^)())completionBlock
+{
+    NNViewControllerContainer *toViewContainer = _viewContainers[index];
     NNViewControllerContainer *fromViewContainer = _visibleContainer;
     
     CGRect rect = fromViewContainer.frame;
@@ -476,9 +484,13 @@
 - (void)_finishPopupFromViewController:(NNViewControllerContainer *)fromViewContainer toViewController:(NNViewControllerContainer *)toViewContainer
 {
     toViewContainer.userInteractionEnabled = YES;
-    fromViewContainer.userInteractionEnabled = YES;
-    [fromViewContainer removeFromSuperviewAndParentViewController];
-    [_viewContainers removeLastObject];
+    
+    for (NSInteger i = [_viewContainers count]-1; i > [_viewContainers indexOfObject:toViewContainer]; i--) {
+        NNViewControllerContainer *container = _viewContainers[i];
+        [container removeFromSuperviewAndParentViewController];
+        [_viewContainers removeObjectAtIndex:i];
+    }
+    
     _visibleContainer = toViewContainer;
     [_visibleContainer.viewController didMoveToParentViewController:self];
 }
@@ -525,7 +537,7 @@
         if ((point.x > self.view.frame.size.width / 2 && [recognizer velocityInView:self.view].x > - 10) || [recognizer velocityInView:self.view].x > 300) {
             _isAnimation = YES;
             __weak __block typeof (self) weakSelf = self;
-            [self _startPopTransition:^{
+            [self _startPopTransitionToIndex:_viewContainers.count-2 completionBlock:^{
                 [weakSelf _finishPopupFromViewController:fromViewContainer toViewController:toViewContainer];
                 _isAnimation = NO;
             }];

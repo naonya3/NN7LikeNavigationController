@@ -112,9 +112,13 @@
     [self dismissViewControllerAnimated:YES completion:nil];
 }
 
+- (IBAction)didTouchPopToRootViewControllerButton:(id)sender {
+    [self.nn7NavigationController popToRootViewControllerAnimated:YES];
+}
+
 - (void)dealloc
 {
-
+    NSLog(@"dealloc");
 }
 
 @end
